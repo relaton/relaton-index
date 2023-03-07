@@ -9,8 +9,8 @@ gem "rake", "~> 13.0"
 
 gem "rspec", "~> 3.0"
 
-gem "rubocop", "~> 1.46"
-gem "rubocop-performance", "~> 1.15"
-gem "rubocop-rails", "~> 2.17"
+gem "rubocop", "~> 1.48"
+gem "rubocop-performance", "~> 1.16"
+gem "rubocop-rails", "~> 2.18"
 
 gem "simplecov", "~> 0.22"

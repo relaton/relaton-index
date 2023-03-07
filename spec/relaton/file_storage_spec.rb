@@ -25,8 +25,9 @@ describe Relaton::Index::FileStorage do
     end
 
     it "#write" do
-      expect(File).to receive(:write).with("index.yaml", :data, encoding: "UTF-8")
-      described_class.write("index.yaml", :data)
+      expect(FileUtils).to receive(:mkdir_p).with("iho")
+      expect(File).to receive(:write).with("iho/index.yaml", :data, encoding: "UTF-8")
+      described_class.write("iho/index.yaml", :data)
     end
   end
 end

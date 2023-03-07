@@ -37,6 +37,8 @@ module Relaton
       # @return [void]
       #
       def write(file, data)
+        dir = File.dirname file
+        FileUtils.mkdir_p dir
         File.write file, data, encoding: "UTF-8"
       end
 
