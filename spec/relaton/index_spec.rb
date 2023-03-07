@@ -1,0 +1,43 @@
+# frozen_string_literal: true
+
+RSpec.describe Relaton::Index do
+  it "has a version number" do
+    expect(Relaton::Index::VERSION).not_to be nil
+  end
+
+  it "create Pool" do
+    pool = double("pool")
+    expect(pool).to receive(:type).with("ISO", :url).and_return :idx
+    expect(Relaton::Index::Pool).to receive(:new).and_return pool
+    expect(described_class.find_or_create("ISO", url: :url)).to eq :idx
+  end
+
+  it "close" do
+    pool = double("pool")
+    expect(pool).to receive(:remove).with(:IHO)
+    described_class.instance_variable_set(:@pool, pool)
+    described_class.close :IHO
+  end
+
+  context "config" do
+    it "default" do
+      expect(Relaton::Index.config).to be_a Relaton::Index::Config
+      expect(Relaton::Index.config.storage).to eq Relaton::Index::FileStorage
+      expect(Relaton::Index.config.storage_dir).to eq Dir.home
+    end
+
+    it "configure storage" do
+      Relaton::Index.configure do |config|
+        config.storage = :custom_storage
+      end
+      expect(Relaton::Index.config.storage).to eq :custom_storage
+    end
+
+    it "configure storage_dir" do
+      Relaton::Index.configure do |config|
+        config.storage_dir = "/"
+      end
+      expect(Relaton::Index.config.storage_dir).to eq "/"
+    end
+  end
+end

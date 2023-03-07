@@ -1,0 +1,80 @@
+= Relaton::Index
+
+image:https://img.shields.io/gem/v/relaton-index.svg["Gem Version", link="https://rubygems.org/gems/relaton-index"]
+[![Build Status](https://travis-ci.org/relaton/relaton-index.svg?branch=master)](https://travis-ci.org/relaton/relaton-index)
+image:https://github.com/relaton/relaton-index/workflows/macos/badge.svg["Build Status (macOS)", link="https://github.com/relaton/relaton-index/actions?workflow=macos"]
+image:https://github.com/relaton/relaton-index/workflows/windows/badge.svg["Build Status (Windows)", link="https://github.com/relaton/relaton-index/actions?workflow=windows"]
+image:https://github.com/relaton/relaton-index/workflows/ubuntu/badge.svg["Build Status (Ubuntu)", link="https://github.com/relaton/relaton-index/actions?workflow=ubuntu"]
+image:https://codeclimate.com/github/relaton/relaton-index/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/metanorma/relaton-index"]
+image:https://img.shields.io/github/issues-pr-raw/relaton/relaton-index.svg["Pull Requests", link="https://github.com/relaton/relaton-index/pulls"]
+image:https://img.shields.io/github/commits-since/relaton/relaton-index/latest.svg["Commits since latest",link="https://github.com/relaton/relaton-index/releases"]
+
+This gem is a part of [Relaton](https://github.com/relaton) project. It provides a way to index Relaton documents' files and search them by references.
+
+== Installation
+
+Install the gem and add it to the application's Gemfile by executing:
+
+    $ bundle add relaton-index
+
+If bundler is not being used to manage dependencies, install the gem by executing:
+
+    $ gem install relaton-index
+
+== Usage
+
+The aim of this gem is to be used by Relaton libraries in two ways:
+- indexing documents' files in GitHub repositories
+- searching a document by a reference when the Relaton library fetches a document
+
+=== Indexing
+
+In this case, the Relaton library should create an index object and add documents' files to it. The index object should be saved to the `index.yaml` file in the root of the repository.
+
+[source,ruby]
+---- 
+require 'relaton/index' 
+
+# Create a new index object or fetch an existing one. The first argument is the type of dataset (ISO, IEC, IHO, etc.) URL should not be specified.
+index = Relaton::Index.find_or_create :IHO
+
+# Add a document to the index or update it if it already exists.
+index.add_or_update id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml"
+
+# Save the index to the `index.yaml` file in the current directory.
+index.save
+----
+
+=== Searching
+
+In this case, the Relaton library should create an index object and search for a document by reference. The gem looks for the `.relaton/[TYPE]/index.yaml` file in the user's home directory. The `[TYPE]` is one of downcased ISO, IEC, IHO, etc. If the file is not found or is older than 24 hours then it will be downloaded from the URL specified in the `find_or_create` method.
+
+[source,ruby]
+----
+require 'relaton/index' 
+
+# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index file is saved to the `/[HOME]/.relaton/[TYPE]/index.yaml` file.
+index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip"
+
+
+ # Search for a document by reference 
+ index.search "B-4 2.19.0" 
+ # => ["data/b-4_2_19_0.xml"] 
+
+ # Remove the index from the pool.
+ Relaton::Index.close :IHO
+ ----
+
+== Development
+
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
+== Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/relaton/relaton-index.
+
+== License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
