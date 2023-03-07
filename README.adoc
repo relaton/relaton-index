@@ -1,7 +1,6 @@
 = Relaton::Index
 
 image:https://img.shields.io/gem/v/relaton-index.svg["Gem Version", link="https://rubygems.org/gems/relaton-index"]
-[![Build Status](https://travis-ci.org/relaton/relaton-index.svg?branch=master)](https://travis-ci.org/relaton/relaton-index)
 image:https://github.com/relaton/relaton-index/workflows/macos/badge.svg["Build Status (macOS)", link="https://github.com/relaton/relaton-index/actions?workflow=macos"]
 image:https://github.com/relaton/relaton-index/workflows/windows/badge.svg["Build Status (Windows)", link="https://github.com/relaton/relaton-index/actions?workflow=windows"]
 image:https://github.com/relaton/relaton-index/workflows/ubuntu/badge.svg["Build Status (Ubuntu)", link="https://github.com/relaton/relaton-index/actions?workflow=ubuntu"]
