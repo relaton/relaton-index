@@ -66,7 +66,7 @@ module Relaton
         resp = URI(@url).open
         zip = Zip::InputStream.new resp
         entry = zip.get_next_entry
-        index = YAML.safe_load(entry.get_input_stream.read, [Symbol])
+        index = YAML.safe_load(entry.get_input_stream.read, permitted_classes: [Symbol])
         save index
         index
       end

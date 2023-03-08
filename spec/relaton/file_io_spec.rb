@@ -65,13 +65,14 @@ describe Relaton::Index::FileIO do
       expect(uri).to receive(:open).and_return :resp
       expect(URI).to receive(:parse).with("url").and_return uri
       entry = double("entry")
-      expect(entry).to receive_message_chain(:get_input_stream, :read).and_return :yaml
+      yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
+      expect(entry).to receive_message_chain(:get_input_stream, :read).and_return yaml
       zip = double("zip")
       expect(zip).to receive(:get_next_entry).and_return entry
       expect(Zip::InputStream).to receive(:new).with(:resp).and_return zip
-      expect(YAML).to receive(:safe_load).with(:yaml, [Symbol]).and_return :index
-      expect(subject).to receive(:save).with(:index)
-      expect(subject.fetch_and_save).to be :index
+      index = [{ file: "data/1.yaml", id: 1 }]
+      expect(subject).to receive(:save).with(index)
+      expect(subject.fetch_and_save).to eq index
     end
 
     context "#read_file" do
@@ -84,7 +85,7 @@ describe Relaton::Index::FileIO do
       it "file exists" do
         yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return yaml
-        expect(subject.read_file).to eq [{:file=>"data/1.yaml", :id=>1}]
+        expect(subject.read_file).to eq [{ file: "data/1.yaml", id: 1 }]
       end
     end
 
