@@ -37,7 +37,7 @@ describe Relaton::Index::Type do
       end
 
       it "with block" do
-        expect(subject.search("id2") { |i| i[:id] == "id1" }).to eq [{ id: "id1", file: "file1" }]
+        expect(subject.search { |i| i[:id] == "id1" }).to eq [{ id: "id1", file: "file1" }]
       end
     end
 

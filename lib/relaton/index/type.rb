@@ -39,7 +39,7 @@ module Relaton
       #
       # @return [Array<Hash>] search results
       #
-      def search(id)
+      def search(id = nil)
         @index.select do |i|
           block_given? ? yield(i) : i[:id].include?(id)
         end

@@ -57,8 +57,15 @@ index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.
 
 
 # Search for a document by reference 
-index.search "B-4 2.19.0" 
-# => ["data/b-4_2_19_0.xml"] 
+index.search "B-4" 
+# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
+
+# Search for a document by reference using a block
+index.search do |row|
+  # do something with the index row
+  row[:id] == "B-4"
+end
+# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
 
 # Remove the index from the pool.
 Relaton::Index.close :IHO
