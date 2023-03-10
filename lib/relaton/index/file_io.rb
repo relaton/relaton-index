@@ -6,6 +6,8 @@ module Relaton
     # In index mode url should be nil.
     #
     class FileIO
+      attr_reader :url
+
       #
       # Initialize FileIO
       #
@@ -14,9 +16,10 @@ module Relaton
       #   (if not exists, or older than 24 hours) or nil if index is used to
       #   index files
       #
-      def initialize(dir, url)
+      def initialize(dir, url, filename)
         @dir = dir
         @url = url
+        @filename = filename
       end
 
       #
@@ -25,11 +28,11 @@ module Relaton
       # @return [Array<Hash>] index
       #
       def read
-        if @url
-          @file ||= File.join(Index.config.storage_dir, ".relaton", @dir, Index.config.filename)
+        if url
+          @file ||= File.join(Index.config.storage_dir, ".relaton", @dir, @filename)
           check_file || fetch_and_save
         else
-          @file ||= Index.config.filename
+          @file ||= @filename
           read_file
         end
       end
@@ -64,7 +67,7 @@ module Relaton
       # @return [Array<Hash>] index
       #
       def fetch_and_save
-        resp = URI(@url).open
+        resp = URI(url).open
         zip = Zip::InputStream.new resp
         entry = zip.get_next_entry
         index = YAML.safe_load(entry.get_input_stream.read, permitted_classes: [Symbol])

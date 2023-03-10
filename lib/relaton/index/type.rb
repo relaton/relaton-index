@@ -9,10 +9,17 @@ module Relaton
       #
       # @param [String, Symbol] type type of index (ISO, IEC, etc.)
       # @param [String, nil] url external URL to index, used to fetch index for searching files
+      # @param [String, nil] file output file name
       #
-      def initialize(type, url = nil)
-        @file_io = FileIO.new type.to_s.downcase, url
+      def initialize(type, url = nil, file = nil)
+        @file = file
+        filename = file || Index.config.filename
+        @file_io = FileIO.new type.to_s.downcase, url, filename
         @index = @file_io.read
+      end
+
+      def actual?(**args)
+        (!args.key?(:url) || args[:url] == @file_io.url) && (!args.key?(:file) || args[:file] == @file)
       end
 
       #

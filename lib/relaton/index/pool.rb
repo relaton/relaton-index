@@ -13,11 +13,16 @@ module Relaton
       #
       # @param [String] type <description>
       # @param [String, nil] url external URL to index, used to fetch index for searching files
+      # @param [String, nil] file output file name
       #
       # @return [Relaton::Index::Type] typed index
       #
-      def type(type, url)
-        @pool[type.upcase.to_sym] ||= Type.new(type, url)
+      def type(type, **args)
+        if @pool[type.upcase.to_sym]&.actual?(**args)
+          @pool[type.upcase.to_sym]
+        else
+          @pool[type.upcase.to_sym] = Type.new(type, args[:url], args[:file])
+        end
       end
 
       #

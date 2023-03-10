@@ -22,18 +22,33 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 == Usage
 
+[source,ruby]
+----
+require 'relaton/index'
+
+# Create a new index object. The first argument is the type of dataset (ISO, IEC, IHO, etc.) URL and filename are optional.
+Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip", filename: "index-iho.yaml"
+
+# Find an existing index object (created before).
+Relaton::Index.find_or_create :IHO
+
+# If a new value of URL or filename is specified and has a new value (different from what it was before), the index object will be recreated.
+Relaton::Index.find_or_create :IHO, url: nil, filename: "index.yaml"
+
+# Remove the index from the pool.
+Relaton::Index.close :IHO
+----
+
 The aim of this gem is to be used by Relaton libraries in two ways:
 - indexing documents' files in GitHub repositories
 - searching a document by a reference when the Relaton library fetches a document
 
 === Indexing
 
-In this case, the Relaton library creates an index object and adds documents' files to it. By default, the index object is saved to the `index.yaml` file in the root of the repository. The filename can be changed using the `filename` setting
+In this case, the Relaton library creates an index object and adds documents' files to it. By default, the index object is saved to the `index.yaml` file in the root of the repository. The filename can be changed using the `filename` setting.
 
 [source,ruby]
 ---- 
-require 'relaton/index' 
-
 # Create a new index object or fetch an existing one. The first argument is the type of dataset (ISO, IEC, IHO, etc.) URL should not be specified.
 index = Relaton::Index.find_or_create :IHO
 
@@ -50,9 +65,7 @@ In this case, the Relaton library should create an index object and search for a
 
 [source,ruby]
 ----
-require 'relaton/index' 
-
-# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index file is saved to the `/[HOME]/.relaton/iho/index.yaml` file.
+# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index is saved as `index.yaml` file to the `/[HOME]/.relaton/iho/` folder.
 index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip"
 
 
@@ -66,9 +79,6 @@ index.search do |row|
   row[:id] == "B-4"
 end
 # => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
-
-# Remove the index from the pool.
-Relaton::Index.close :IHO
 ----
 
 === Configuration
@@ -86,6 +96,12 @@ Relaton::Index.config do |config|
   config.storage = S3Storage
   config.storage_dir = "/"
 end
+----
+
+It's also possible to redefine file name for a specific type of index:
+[source,ruby]
+----
+index = Relaton::Index.find_or_create :IHO, filename: "index-iho.yaml"
 ----
 
 == Development

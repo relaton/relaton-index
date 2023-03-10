@@ -1,11 +1,24 @@
 describe Relaton::Index::Type do
-  it "create Type" do
-    file_io = double("file_io")
-    expect(file_io).to receive(:read).and_return :index
-    expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url).and_return file_io
-    idx = described_class.new(:ISO, :url)
-    expect(idx.instance_variable_get(:@file_io)).to be file_io
-    expect(idx.instance_variable_get(:@index)).to be :index
+  before { Relaton::Index.instance_variable_set(:@config, nil) }
+
+  context "create Type" do
+    it "with default filename" do
+      file_io = double("file_io")
+      expect(file_io).to receive(:read).and_return :index
+      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml").and_return file_io
+      idx = described_class.new(:ISO, :url)
+      expect(idx.instance_variable_get(:@file_io)).to be file_io
+      expect(idx.instance_variable_get(:@index)).to be :index
+    end
+
+    it "with custom filename" do
+      file_io = double("file_io")
+      expect(file_io).to receive(:read).and_return :index
+      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, :file).and_return file_io
+      idx = described_class.new(:ISO, :url, :file)
+      expect(idx.instance_variable_get(:@file_io)).to be file_io
+      expect(idx.instance_variable_get(:@index)).to be :index
+    end
   end
 
   context "instace methods" do
@@ -13,8 +26,28 @@ describe Relaton::Index::Type do
     let(:file_io) { double("file_io", read: index) }
 
     subject do
-      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url).and_return file_io
-      described_class.new(:ISO, :url)
+      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml").and_return file_io
+      described_class.new(:ISO, :url, "index.yaml")
+    end
+
+    context "#actual?" do
+      it "no url and file" do
+        expect(subject.actual?).to be true
+      end
+
+      it "new url" do
+        expect(file_io).to receive(:url).and_return :old
+        expect(subject.actual?(url: :new)).to be false
+      end
+
+      it "new file" do
+        expect(subject.actual?(file: :new)).to be false
+      end
+
+      it "same url and file" do
+        expect(file_io).to receive(:url).and_return :url
+        expect(subject.actual?(url: :url, file: "index.yaml")).to be true
+      end
     end
 
     context "#add_or_update" do

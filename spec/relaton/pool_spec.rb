@@ -4,9 +4,21 @@ describe Relaton::Index::Pool do
   end
 
   context "instace methods" do
-    it "#type" do
-      expect(Relaton::Index::Type).to receive(:new).with("ISO", :url).and_return :idx
-      expect(subject.type("ISO", :url)).to be :idx
+    context "#type" do
+      let(:idx) { double("idx") }
+      before do
+        expect(Relaton::Index::Type).to receive(:new).with("ISO", :url, :file).and_return idx
+      end
+
+      it "create new Type" do
+        expect(subject.type("ISO", url: :url, file: :file)).to be idx
+      end
+
+      it "return existing Type" do
+        expect(idx).to receive(:actual?).with(url: :url, file: :file).and_return true
+        subject.type("ISO", url: :url, file: :file)
+        expect(subject.type(:ISO, url: :url, file: :file)).to be idx
+      end
     end
 
     it "#remove" do

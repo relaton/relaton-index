@@ -7,9 +7,9 @@ RSpec.describe Relaton::Index do
 
   it "create Pool" do
     pool = double("pool")
-    expect(pool).to receive(:type).with("ISO", :url).and_return :idx
+    expect(pool).to receive(:type).with("ISO", :url, :file).and_return :idx
     expect(Relaton::Index::Pool).to receive(:new).and_return pool
-    expect(described_class.find_or_create("ISO", url: :url)).to eq :idx
+    expect(described_class.find_or_create("ISO", url: :url, file: :file)).to eq :idx
   end
 
   it "close" do

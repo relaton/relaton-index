@@ -1,20 +1,21 @@
 describe Relaton::Index::FileIO do
   it "create FileIO" do
-    fio = described_class.new("iso", :url)
+    fio = described_class.new("iso", :url, :filename)
     expect(fio.instance_variable_get(:@dir)).to eq "iso"
     expect(fio.instance_variable_get(:@url)).to eq :url
+    expect(fio.instance_variable_get(:@filename)).to eq :filename
   end
 
   context "instace methods" do
     subject do
-      subj = described_class.new("iso", nil)
+      subj = described_class.new("iso", nil, "index.yaml")
       subj.instance_variable_set(:@file, "index.yaml")
       subj
     end
 
     context "#read" do
       it "without url" do
-        fio = described_class.new("iso", nil)
+        fio = described_class.new("iso", nil, "index.yaml")
         expect(fio).to receive(:read_file).and_return :index
         expect(fio.read).to be :index
         expect(fio.instance_variable_get(:@file)).to eq "index.yaml"
@@ -22,7 +23,7 @@ describe Relaton::Index::FileIO do
 
       context "with url" do
         let(:file) { File.join(Dir.home, ".relaton", "iso", "index.yaml") }
-        subject { described_class.new("iso", :url) }
+        subject { described_class.new("iso", :url, "index.yaml") }
 
         it "index file exists and actual" do
           expect(subject).to receive(:check_file).and_return :index
