@@ -10,8 +10,9 @@ module Relaton
       # Initialize FileIO
       #
       # @param [String] dir local directory in ~/.relaton to store index
-      # @param [String, nil] url git repository URL to fetch index from (if not exists, or older than 24 hours)
-      #   or nil if index is used to index files
+      # @param [String, nil] url git repository URL to fetch index from
+      #   (if not exists, or older than 24 hours) or nil if index is used to
+      #   index files
       #
       def initialize(dir, url)
         @dir = dir
@@ -25,10 +26,10 @@ module Relaton
       #
       def read
         if @url
-          @file ||= File.join(Index.config.storage_dir, ".relaton", @dir, "index.yaml")
+          @file ||= File.join(Index.config.storage_dir, ".relaton", @dir, Index.config.filename)
           check_file || fetch_and_save
         else
-          @file ||= "index.yaml"
+          @file ||= Index.config.filename
           read_file
         end
       end

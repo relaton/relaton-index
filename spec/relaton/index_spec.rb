@@ -39,5 +39,12 @@ RSpec.describe Relaton::Index do
       end
       expect(Relaton::Index.config.storage_dir).to eq "/"
     end
+
+    it "configure filename" do
+      Relaton::Index.configure do |config|
+        config.filename = "index-new.yml"
+      end
+      expect(Relaton::Index.config.filename).to eq "index-new.yml"
+    end
   end
 end

@@ -4,7 +4,7 @@ module Relaton
     # Configuration class for Relaton::Index
     #
     class Config
-      attr_reader :storage, :storage_dir
+      attr_reader :storage, :storage_dir, :filename
 
       #
       # Set default values
@@ -12,6 +12,7 @@ module Relaton
       def initialize
         @storage = FileStorage
         @storage_dir = Dir.home
+        @filename = "index.yaml"
       end
 
       #
@@ -34,6 +35,17 @@ module Relaton
       #
       def storage_dir=(dir)
         @storage_dir = dir
+      end
+
+      #
+      # Set filename
+      #
+      # @param [String] filename filename
+      #
+      # @return [void]
+      #
+      def filename=(filename)
+        @filename = filename
       end
     end
   end

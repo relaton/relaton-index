@@ -28,7 +28,7 @@ The aim of this gem is to be used by Relaton libraries in two ways:
 
 === Indexing
 
-In this case, the Relaton library should create an index object and add documents' files to it. The index object should be saved to the `index.yaml` file in the root of the repository.
+In this case, the Relaton library creates an index object and adds documents' files to it. By default, the index object is saved to the `index.yaml` file in the root of the repository. The filename can be changed using the `filename` setting
 
 [source,ruby]
 ---- 
@@ -52,7 +52,7 @@ In this case, the Relaton library should create an index object and search for a
 ----
 require 'relaton/index' 
 
-# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index file is saved to the `/[HOME]/.relaton/[TYPE]/index.yaml` file.
+# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index file is saved to the `/[HOME]/.relaton/iho/index.yaml` file.
 index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip"
 
 
@@ -69,6 +69,23 @@ end
 
 # Remove the index from the pool.
 Relaton::Index.close :IHO
+----
+
+=== Configuration
+
+The gem can be configured by using the `Relaton::Index.config` method. The following settings are available:
+
+- `filename` - the name of the index file. By default, it is `index.yaml`.
+- `storage` - the storage class or module. By default, it is `FileStorage` module. It can be any class or module that implements the `ctime`, `read`, and `write` class methods.
+- `storage_dir` - the directory where the `.relaton/[TYPE]` folder is created. By default, it's a user's home dir. This setting works only when the gem is used for searching. When indexing, the index is always saved in a current folder.
+
+[source,ruby]
+----
+Relaton::Index.config do |config|
+  config.filename = "index-new.yaml"
+  config.storage = S3Storage
+  config.storage_dir = "/"
+end
 ----
 
 == Development
