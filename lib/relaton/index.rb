@@ -25,7 +25,7 @@ module Relaton
       # @return [Relaton::Index::Type] typed index
       #
       def find_or_create(type, url: nil, file: nil)
-        pool.type(type, url, file)
+        pool.type(type, url: url, file: file)
       end
 
       def close(type)
