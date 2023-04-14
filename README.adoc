@@ -32,7 +32,7 @@ Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/rela
 # Find an existing index object (created before).
 Relaton::Index.find_or_create :IHO
 
-# If a new value of URL or filename is specified and has a new value (different from what it was before), the index object will be recreated.
+# If the URL or filename is specified and has a new value (different from what it was before), the index object will be recreated.
 Relaton::Index.find_or_create :IHO, url: nil, filename: "index.yaml"
 
 # Remove the index from the pool.
@@ -79,6 +79,13 @@ index.search do |row|
   row[:id] == "B-4"
 end
 # => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
+----
+
+=== Remove all index records
+
+[source,ruby]
+----
+index.remove_all
 ----
 
 === Configuration

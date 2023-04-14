@@ -18,6 +18,16 @@ module Relaton
         @index = @file_io.read
       end
 
+      #
+      # Check if index is actual. If url or file is given, check if it is equal to
+      # index url or file.
+      #
+      # @param [Hash] **args arguments
+      # @option args [String, nil] :url external URL to index, used to fetch index for searching files
+      # @option args [String, nil] :file output file name
+      #
+      # @return [Boolean] true if index is actual, false otherwise
+      #
       def actual?(**args)
         (!args.key?(:url) || args[:url] == @file_io.url) && (!args.key?(:file) || args[:file] == @file)
       end
@@ -59,6 +69,15 @@ module Relaton
       #
       def save
         @file_io.save @index
+      end
+
+      #
+      # Remove all index items
+      #
+      # @return [void]
+      #
+      def remove_all
+        @index = []
       end
     end
   end

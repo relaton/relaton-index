@@ -78,5 +78,11 @@ describe Relaton::Index::Type do
       expect(file_io).to receive(:save).with(index)
       subject.save
     end
+
+    it "#remove_all" do
+      subject.remove_all
+      index = subject.instance_variable_get(:@index)
+      expect(index).to eq []
+    end
   end
 end
