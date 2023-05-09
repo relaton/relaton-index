@@ -42,6 +42,19 @@ module Relaton
         File.write file, data, encoding: "UTF-8"
       end
 
+      #
+      # Remove file
+      #
+      # @param [String] file file path
+      #
+      # @return [void]
+      #
+      def remove(file)
+        return unless File.exist? file
+
+        File.delete file
+      end
+
       extend self
     end
   end

@@ -15,7 +15,10 @@ module Relaton
         @file = file
         filename = file || Index.config.filename
         @file_io = FileIO.new type.to_s.downcase, url, filename
-        @index = @file_io.read
+      end
+
+      def index
+        @index ||= @file_io.read
       end
 
       #
@@ -41,11 +44,11 @@ module Relaton
       # @return [void]
       #
       def add_or_update(id, file)
-        item = @index.find { |i| i[:id] == id }
+        item = index.find { |i| i[:id] == id }
         if item
           item[:file] = file
         else
-          @index << { id: id, file: file }
+          index << { id: id, file: file }
         end
       end
 
@@ -57,7 +60,7 @@ module Relaton
       # @return [Array<Hash>] search results
       #
       def search(id = nil)
-        @index.select do |i|
+        index.select do |i|
           block_given? ? yield(i) : i[:id].include?(id)
         end
       end
@@ -69,6 +72,16 @@ module Relaton
       #
       def save
         @file_io.save @index
+      end
+
+      #
+      # Remove index file from storage and clear index
+      #
+      # @return [void]
+      #
+      def remove
+        @file_io.remove
+        @index = nil
       end
 
       #

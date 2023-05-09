@@ -29,5 +29,11 @@ describe Relaton::Index::FileStorage do
       expect(File).to receive(:write).with("iho/index.yaml", :data, encoding: "UTF-8")
       described_class.write("iho/index.yaml", :data)
     end
+
+    it "#remove" do
+      expect(File).to receive(:exist?).with("iho/index.yaml").and_return true
+      expect(File).to receive(:delete).with("iho/index.yaml")
+      described_class.remove("iho/index.yaml")
+    end
   end
 end
