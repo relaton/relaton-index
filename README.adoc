@@ -83,9 +83,20 @@ end
 
 === Remove all index records
 
+This method removes all records from the index object. The index file is not removed.
+
 [source,ruby]
 ----
 index.remove_all
+----
+
+=== Remove index file
+
+This method removes the index file. The index object is cleared and can be used for indexing or loading a file from the specified URL.
+
+[source,ruby]
+----
+index.remove
 ----
 
 === Configuration

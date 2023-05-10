@@ -78,12 +78,21 @@ module Relaton
       #
       # Save index to storage
       #
-      # @param [Array<Hash>] index <description>
+      # @param [Array<Hash>] index index to save
       #
       # @return [void]
       #
       def save(index)
         Index.config.storage.write @file, index.to_yaml
+      end
+
+      #
+      # Remove index file from storage
+      #
+      # @return [void]
+      #
+      def remove
+        Index.config.storage.remove @file
       end
     end
   end

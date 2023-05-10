@@ -94,5 +94,10 @@ describe Relaton::Index::FileIO do
       expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id: '1'\n  :file: data/1.yaml\n")
       subject.save [{ id: "1", file: "data/1.yaml" }]
     end
+
+    it "#remove" do
+      expect(Relaton::Index::FileStorage).to receive(:remove).with("index.yaml")
+      subject.remove
+    end
   end
 end
