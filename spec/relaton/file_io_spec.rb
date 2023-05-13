@@ -23,7 +23,7 @@ describe Relaton::Index::FileIO do
 
       context "with url" do
         let(:file) { File.join(Dir.home, ".relaton", "iso", "index.yaml") }
-        subject { described_class.new("iso", :url, "index.yaml") }
+        subject { described_class.new("iso", "url", "index.yaml") }
 
         it "index file exists and actual" do
           expect(subject).to receive(:check_file).and_return :index
@@ -37,6 +37,12 @@ describe Relaton::Index::FileIO do
           expect(subject.read).to be :index
           expect(subject.instance_variable_get(:@file)).to eq file
         end
+      end
+
+      it "remove file" do
+        subject.instance_variable_set(:@url, true)
+        expect(subject).to receive(:read_file).and_return []
+        expect(subject.read).to eq []
       end
     end
 

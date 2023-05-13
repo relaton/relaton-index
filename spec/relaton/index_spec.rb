@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Relaton::Index do
+  before do
+    described_class.instance_variable_set(:@pool, nil)
+  end
+
   it "has a version number" do
     expect(Relaton::Index::VERSION).not_to be nil
   end
@@ -10,6 +14,12 @@ RSpec.describe Relaton::Index do
     expect(pool).to receive(:type).with("ISO", url: :url, file: :file).and_return :idx
     expect(Relaton::Index::Pool).to receive(:new).and_return pool
     expect(described_class.find_or_create("ISO", url: :url, file: :file)).to eq :idx
+  end
+
+  it "remove local index" do
+    idx = described_class.find_or_create("ISO", url: true)
+    expect(described_class.config.storage).to receive(:remove).with("index.yaml")
+    idx.remove_file
   end
 
   it "close" do

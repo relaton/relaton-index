@@ -79,7 +79,7 @@ module Relaton
       #
       # @return [void]
       #
-      def remove
+      def remove_file
         @file_io.remove
         @index = nil
       end

@@ -12,7 +12,7 @@ module Relaton
       # Initialize FileIO
       #
       # @param [String] dir local directory in ~/.relaton to store index
-      # @param [String, nil] url git repository URL to fetch index from
+      # @param [String, Boolean, nil] url git repository URL to fetch index from
       #   (if not exists, or older than 24 hours) or nil if index is used to
       #   index files
       #
@@ -23,18 +23,35 @@ module Relaton
       end
 
       #
-      # Read index from storage or fetch from external repository
+      # If url is String, check if index file exists and is not older than 24
+      #   hours. If not, fetch index from external repository and save it to
+      #   storage.
+      # If url is true, remove index from storage.
+      # If url is nil, read index from file.
       #
       # @return [Array<Hash>] index
       #
       def read
-        if url
-          @file ||= File.join(Index.config.storage_dir, ".relaton", @dir, @filename)
+        case url
+        when String
+          @file ||= path_to_local_file
           check_file || fetch_and_save
+        when true
+          @file ||= path_to_local_file
+          read_file
         else
           @file ||= @filename
           read_file
         end
+      end
+
+      #
+      # Create path to local file
+      #
+      # @return [<Type>] <description>
+      #
+      def path_to_local_file
+        File.join(Index.config.storage_dir, ".relaton", @dir, @filename)
       end
 
       #
@@ -89,10 +106,11 @@ module Relaton
       #
       # Remove index file from storage
       #
-      # @return [void]
+      # @return [Array]
       #
       def remove
-        Index.config.storage.remove @file
+        Index.config.storage.remove @filename
+        []
       end
     end
   end

@@ -80,9 +80,9 @@ describe Relaton::Index::Type do
       subject.save
     end
 
-    it "#remove" do
+    it "#remove_file" do
       expect(file_io).to receive(:remove)
-      subject.remove
+      subject.remove_file
     end
 
     it "#remove_all" do

@@ -61,11 +61,11 @@ index.save
 
 === Searching
 
-In this case, the Relaton library should create an index object and search for a document by reference. The gem looks for the `.relaton/[TYPE]/index.yaml` file in the user's home directory. The `[TYPE]` is one of downcased ISO, IEC, IHO, etc. If the file is not found or is older than 24 hours then it will be downloaded from the URL specified in the `find_or_create` method.
+In this case, the Relaton library should create an index object and search for a document by reference. The gem looks for the `.relaton/[TYPE]/index.yaml` file in the user's home directory. The `[TYPE]` is one of downcased ISO, IEC, IHO, etc. If the file is not found or is older than 24 hours then it will be downloaded from the URL specified in the `find_or_create` method. The URL can be specified as `true` if the index should not be fetched from the URL.
 
 [source,ruby]
 ----
-# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index is saved as `index.yaml` file to the `/[HOME]/.relaton/iho/` folder.
+# Create a new index object or fetch an existing one. URL should be specified. If the index file is not found or is older than 24 hours, it will be downloaded from the URL. By default, the index is saved as `index.yaml` file to the `/[HOME]/.relaton/iho/` folder. If the URL is specified as `true`, the index won't be fetched from the URL.
 index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip"
 
 
@@ -96,7 +96,7 @@ This method removes the index file. The index object is cleared and can be used 
 
 [source,ruby]
 ----
-index.remove
+index.remove_file
 ----
 
 === Configuration
