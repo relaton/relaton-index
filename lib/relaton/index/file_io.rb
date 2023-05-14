@@ -34,15 +34,14 @@ module Relaton
       def read
         case url
         when String
-          @file ||= path_to_local_file
           check_file || fetch_and_save
-        when true
-          @file ||= path_to_local_file
-          read_file
         else
-          @file ||= @filename
           read_file
         end
+      end
+
+      def file
+        @file ||= url ? path_to_local_file : @filename
       end
 
       #
@@ -60,7 +59,7 @@ module Relaton
       # @return [Array<Hash>, nil] index or nil
       #
       def check_file
-        ctime = Index.config.storage.ctime(@file)
+        ctime = Index.config.storage.ctime(file)
         return unless ctime && ctime > Time.now - 86400
 
         read_file
@@ -72,7 +71,7 @@ module Relaton
       # @return [Array<Hash>] index
       #
       def read_file
-        yaml = Index.config.storage.read(@file)
+        yaml = Index.config.storage.read(file)
         return [] unless yaml
 
         YAML.safe_load yaml, permitted_classes: [Symbol]
@@ -100,7 +99,7 @@ module Relaton
       # @return [void]
       #
       def save(index)
-        Index.config.storage.write @file, index.to_yaml
+        Index.config.storage.write file, index.to_yaml
       end
 
       #
@@ -109,7 +108,7 @@ module Relaton
       # @return [Array]
       #
       def remove
-        Index.config.storage.remove @filename
+        Index.config.storage.remove file
         []
       end
     end

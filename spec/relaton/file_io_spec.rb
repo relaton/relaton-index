@@ -18,24 +18,20 @@ describe Relaton::Index::FileIO do
         fio = described_class.new("iso", nil, "index.yaml")
         expect(fio).to receive(:read_file).and_return :index
         expect(fio.read).to be :index
-        expect(fio.instance_variable_get(:@file)).to eq "index.yaml"
       end
 
       context "with url" do
-        let(:file) { File.join(Dir.home, ".relaton", "iso", "index.yaml") }
         subject { described_class.new("iso", "url", "index.yaml") }
 
         it "index file exists and actual" do
           expect(subject).to receive(:check_file).and_return :index
           expect(subject.read).to be :index
-          expect(subject.instance_variable_get(:@file)).to eq file
         end
 
         it "index file doesn't exist or not actual" do
           expect(subject).to receive(:check_file).and_return nil
           expect(subject).to receive(:fetch_and_save).and_return :index
           expect(subject.read).to be :index
-          expect(subject.instance_variable_get(:@file)).to eq file
         end
       end
 

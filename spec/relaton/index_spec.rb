@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Relaton::Index do
+  let(:file) { File.join(Dir.home, ".relaton", "iso", "index.yaml") }
+
   before do
     described_class.instance_variable_set(:@pool, nil)
   end
@@ -18,7 +20,7 @@ RSpec.describe Relaton::Index do
 
   it "remove local index" do
     idx = described_class.find_or_create("ISO", url: true)
-    expect(described_class.config.storage).to receive(:remove).with("index.yaml")
+    expect(described_class.config.storage).to receive(:remove).with(file)
     idx.remove_file
   end
 
