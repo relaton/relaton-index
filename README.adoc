@@ -33,7 +33,7 @@ Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/rela
 Relaton::Index.find_or_create :IHO
 
 # If the URL or filename is specified and has a new value (different from what it was before), the index object will be recreated.
-Relaton::Index.find_or_create :IHO, url: nil, filename: "index.yaml"
+Relaton::Index.find_or_create :IHO, url: nil, file: "index.yaml"
 
 # Remove the index from the pool.
 Relaton::Index.close :IHO
@@ -53,7 +53,7 @@ In this case, the Relaton library creates an index object and adds documents' fi
 index = Relaton::Index.find_or_create :IHO
 
 # Add a document to the index or update it if it already exists.
-index.add_or_update id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml"
+index.add_or_update "B-4 2.19.0", "data/b-4_2_19_0.xml"
 
 # Save the index to the `index.yaml` file in the current directory.
 index.save

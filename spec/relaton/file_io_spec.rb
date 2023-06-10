@@ -35,9 +35,9 @@ describe Relaton::Index::FileIO do
         end
       end
 
-      it "remove file" do
+      it "fails to read file" do
         subject.instance_variable_set(:@url, true)
-        expect(subject).to receive(:read_file).and_return []
+        expect(subject).to receive(:read_file).and_return nil
         expect(subject.read).to eq []
       end
     end
@@ -81,14 +81,20 @@ describe Relaton::Index::FileIO do
     context "#read_file" do
       it "file doesn't exist" do
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return nil
-        expect(YAML).not_to receive(:load)
-        expect(subject.read_file).to eq []
+        expect(YAML).not_to receive(:safe_load)
+        expect(subject.read_file).to be_nil
       end
 
       it "file exists" do
         yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return yaml
         expect(subject.read_file).to eq [{ file: "data/1.yaml", id: 1 }]
+      end
+
+      it "fail to load yaml" do
+        wrong_yaml = "---\n- :id: :file: data/1.yaml\n"
+        expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
+        expect(subject.read_file).to be_nil
       end
     end
 

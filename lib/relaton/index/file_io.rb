@@ -11,10 +11,12 @@ module Relaton
       #
       # Initialize FileIO
       #
-      # @param [String] dir local directory in ~/.relaton to store index
-      # @param [String, Boolean, nil] url git repository URL to fetch index from
-      #   (if not exists, or older than 24 hours) or nil if index is used to
-      #   index files
+      # @param [String] dir falvor specific local directory in ~/.relaton to store index
+      # @param [String, Boolean, nil] url
+      #   if String then the URL is used to fetch an index from a Git repository
+      #     and save it to the storage (if not exists, or older than 24 hours)
+      #   if true then the index is read from the storage (used to remove index file)
+      #   if nil then the fiename is used to read and write file (used to create indes in GH actions)
       #
       def initialize(dir, url, filename)
         @dir = dir
@@ -26,8 +28,8 @@ module Relaton
       # If url is String, check if index file exists and is not older than 24
       #   hours. If not, fetch index from external repository and save it to
       #   storage.
-      # If url is true, remove index from storage.
-      # If url is nil, read index from file.
+      # If url is true, read index from path to local file.
+      # If url is nil, read index from filename.
       #
       # @return [Array<Hash>] index
       #
@@ -36,7 +38,7 @@ module Relaton
         when String
           check_file || fetch_and_save
         else
-          read_file
+          read_file || []
         end
       end
 
@@ -72,9 +74,10 @@ module Relaton
       #
       def read_file
         yaml = Index.config.storage.read(file)
-        return [] unless yaml
+        return unless yaml
 
         YAML.safe_load yaml, permitted_classes: [Symbol]
+      rescue Psych::SyntaxError
       end
 
       #
