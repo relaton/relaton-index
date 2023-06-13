@@ -119,6 +119,11 @@ describe Relaton::Index::FileIO do
         index = [{ id: "1234"  }]
         expect(subject.check_format(index)).to be false
       end
+
+      it "incorrect type" do
+        index = [ :id ]
+        expect(subject.check_format(index)).to be false
+      end
     end
 
     it "#save" do

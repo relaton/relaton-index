@@ -81,13 +81,15 @@ module Relaton
 
       def cehck_basic_format(index)
         keys = %i[file id]
-        index.none? { |item| item.keys.sort != keys }
+        index.all? { |item| item.respond_to?(:keys) && item.keys.sort == keys }
       end
 
       def check_id_format(index)
         return true if @id_keys.empty?
 
-        keys = index.reduce(Set.new) { |acc, item| acc + item[:id].keys }
+        keys = index.each_with_object(Set.new) do |item, acc|
+          acc.merge item[:id].keys if item[:id].is_a?(Hash)
+        end
         keys == @id_keys.to_set
       end
 
