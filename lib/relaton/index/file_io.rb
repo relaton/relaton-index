@@ -75,15 +75,20 @@ module Relaton
       #
       # @return [Boolean] <description>
       #
-      def check_format(index) # rubocop:disable Metrics/AbcSize
-        keys = index.reduce(Set.new) do |acc, item|
-          if item[:id].is_a?(Hash) && @id_keys.any?
-            acc + item.keys + item[:id].keys
-          else
-            acc + item.keys
-          end
-        end
-        keys == [:id, :file, *@id_keys].to_set
+      def check_format(index)
+        cehck_basic_format(index) && check_id_format(index)
+      end
+
+      def cehck_basic_format(index)
+        keys = %i[file id]
+        index.none? { |item| item.keys.sort != keys }
+      end
+
+      def check_id_format(index)
+        return true if @id_keys.empty?
+
+        keys = index.reduce(Set.new) { |acc, item| acc + item[:id].keys }
+        keys == @id_keys.to_set
       end
 
       #

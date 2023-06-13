@@ -99,10 +99,25 @@ describe Relaton::Index::FileIO do
     end
 
     context "#check_format" do
-      it "with id_keys" do
+      let(:index) { [{ file: "data/1.yaml", id: { type: "TR", number: "1234" } }] }
+
+      it "correct with id_keys" do
         subject.instance_variable_set(:@id_keys, %i[type number])
-        index = [{ file: "data/1.yaml", id: { type: "TR", number: "1234" } }]
         expect(subject.check_format(index)).to be true
+      end
+
+      it "incorrect with id_keys" do
+        subject.instance_variable_set(:@id_keys, %i[number year])
+        expect(subject.check_format(index)).to be false
+      end
+
+      it "correct without id_keys" do
+        expect(subject.check_format(index)).to be true
+      end
+
+      it "incorrect without id_keys" do
+        index = [{ id: "1234"  }]
+        expect(subject.check_format(index)).to be false
       end
     end
 
