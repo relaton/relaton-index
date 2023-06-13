@@ -18,10 +18,11 @@ module Relaton
       #   if true then the index is read from the storage (used to remove index file)
       #   if nil then the fiename is used to read and write file (used to create indes in GH actions)
       #
-      def initialize(dir, url, filename)
+      def initialize(dir, url, filename, id_keys)
         @dir = dir
         @url = url
         @filename = filename
+        @id_keys = id_keys || []
       end
 
       #
@@ -68,6 +69,24 @@ module Relaton
       end
 
       #
+      # Check if index has correct format
+      #
+      # @param [Array<Hash>] index index to check
+      #
+      # @return [Boolean] <description>
+      #
+      def check_format(index) # rubocop:disable Metrics/AbcSize
+        keys = index.reduce(Set.new) do |acc, item|
+          if item[:id].is_a?(Hash) && @id_keys.any?
+            acc + item.keys + item[:id].keys
+          else
+            acc + item.keys
+          end
+        end
+        keys == [:id, :file, *@id_keys].to_set
+      end
+
+      #
       # Read index from storage
       #
       # @return [Array<Hash>] index
@@ -76,7 +95,8 @@ module Relaton
         yaml = Index.config.storage.read(file)
         return unless yaml
 
-        YAML.safe_load yaml, permitted_classes: [Symbol]
+        index = YAML.safe_load yaml, permitted_classes: [Symbol]
+        return index if check_format index
       rescue Psych::SyntaxError
       end
 

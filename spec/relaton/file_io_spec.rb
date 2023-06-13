@@ -1,6 +1,6 @@
 describe Relaton::Index::FileIO do
   it "create FileIO" do
-    fio = described_class.new("iso", :url, :filename)
+    fio = described_class.new("iso", :url, :filename, nil)
     expect(fio.instance_variable_get(:@dir)).to eq "iso"
     expect(fio.instance_variable_get(:@url)).to eq :url
     expect(fio.instance_variable_get(:@filename)).to eq :filename
@@ -8,20 +8,20 @@ describe Relaton::Index::FileIO do
 
   context "instace methods" do
     subject do
-      subj = described_class.new("iso", nil, "index.yaml")
+      subj = described_class.new("iso", nil, "index.yaml", nil)
       subj.instance_variable_set(:@file, "index.yaml")
       subj
     end
 
     context "#read" do
       it "without url" do
-        fio = described_class.new("iso", nil, "index.yaml")
+        fio = described_class.new("iso", nil, "index.yaml", nil)
         expect(fio).to receive(:read_file).and_return :index
         expect(fio.read).to be :index
       end
 
       context "with url" do
-        subject { described_class.new("iso", "url", "index.yaml") }
+        subject { described_class.new("iso", "url", "index.yaml", nil) }
 
         it "index file exists and actual" do
           expect(subject).to receive(:check_file).and_return :index
@@ -95,6 +95,14 @@ describe Relaton::Index::FileIO do
         wrong_yaml = "---\n- :id: :file: data/1.yaml\n"
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
         expect(subject.read_file).to be_nil
+      end
+    end
+
+    context "#check_format" do
+      it "with id_keys" do
+        subject.instance_variable_set(:@id_keys, %i[type number])
+        index = [{ file: "data/1.yaml", id: { type: "TR", number: "1234" } }]
+        expect(subject.check_format(index)).to be true
       end
     end
 

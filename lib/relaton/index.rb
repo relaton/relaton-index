@@ -21,11 +21,12 @@ module Relaton
       # @param [String] type index type (ISO, IEC, etc.)
       # @param [String, nil] url external URL to index, used to fetch index for searching files
       # @param [String, nil] file output file name, default is config.filename
+      # @param [Array<Symbol>, nil] id_keys keys to check if index is correct
       #
       # @return [Relaton::Index::Type] typed index
       #
-      def find_or_create(type, url: nil, file: nil)
-        pool.type(type, url: url, file: file)
+      def find_or_create(type, url: nil, file: nil, id_keys: nil)
+        pool.type(type, url: url, file: file, id_keys: id_keys)
       end
 
       def close(type)

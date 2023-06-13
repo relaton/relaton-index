@@ -22,12 +22,28 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 == Usage
 
+=== Creating an index object
+
+The gem provides the `Relaton::Index.find_or_create {type}, url: {url}, file: {filename}, id_keys: {keys}` method to create an index object. The first argument is the type of dataset (ISO, IEC, IHO, etc.). The second argument is the URL to the zipped remote index file. The third argument is the filename of the local index file. The fourth argument is an array of ID's parts names. The URL, filename, and keys are optional.
+
+If the URL is specified and the local file in a `/{home}/.relaton/{type}` dir doesn't exist or is outdated, the index file will be downloaded from the URL saved as a local file and an index object will be created from the file. If the file in the `/{home}/.relaton/{type}` exists and is actual, the index object will be created from the local file.
+
+If the URL isn't specified, the index object will be created from the local file in the current dir `./{filename}`. If the file doesn't exist, the empty index object will be created.
+
+If the filename isn't specified, a default `index,yaml` filename will be used.
+
+If the keys are specified, the local index file will be checked for the presence of the keys. If the keys are not found, the index file will be downloaded from the URL or an empty index object will be created if the URL isn't specified.
+
+It's possible to create many index objects for different types of datasets. The index objects are saved in the pool. The pool is a hash with the type of dataset as a key and the index object as a value. The pool is a class variable of the `Relaton::Index` class. The pool is used to find an existing index object by the type of dataset. The `Relaton::Index.find_or_create` method returns an existing index object if it was created before.
+
+If the URL or filename is specified and has a new value, different from what was used to create the index object before, the index object will be recreated.
+
 [source,ruby]
 ----
 require 'relaton/index'
 
 # Create a new index object. The first argument is the type of dataset (ISO, IEC, IHO, etc.) URL and filename are optional.
-Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip", filename: "index-iho.yaml"
+Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip", file: "index-iho.yaml", id_keys: %i[number part year]
 
 # Find an existing index object (created before).
 Relaton::Index.find_or_create :IHO
@@ -48,7 +64,7 @@ The aim of this gem is to be used by Relaton libraries in two ways:
 In this case, the Relaton library creates an index object and adds documents' files to it. By default, the index object is saved to the `index.yaml` file in the root of the repository. The filename can be changed using the `filename` setting.
 
 [source,ruby]
----- 
+----
 # Create a new index object or fetch an existing one. The first argument is the type of dataset (ISO, IEC, IHO, etc.) URL should not be specified.
 index = Relaton::Index.find_or_create :IHO
 
@@ -69,16 +85,16 @@ In this case, the Relaton library should create an index object and search for a
 index = Relaton::Index.find_or_create :IHO, url: "https://raw.githubusercontent.com/relaton/relaton-data-iho/master/index.zip"
 
 
-# Search for a document by reference 
-index.search "B-4" 
-# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
+# Search for a document by reference
+index.search "B-4"
+# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }]
 
 # Search for a document by reference using a block
 index.search do |row|
   # do something with the index row
   row[:id] == "B-4"
 end
-# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }] 
+# => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }]
 ----
 
 === Remove all index records
@@ -110,7 +126,7 @@ The gem can be configured by using the `Relaton::Index.config` method. The follo
 [source,ruby]
 ----
 Relaton::Index.config do |config|
-  config.filename = "index-new.yaml"
+  config.filename = "index-v1.yaml"
   config.storage = S3Storage
   config.storage_dir = "/"
 end
@@ -119,7 +135,7 @@ end
 It's also possible to redefine file name for a specific type of index:
 [source,ruby]
 ----
-index = Relaton::Index.find_or_create :IHO, filename: "index-iho.yaml"
+index = Relaton::Index.find_or_create :IHO, file: "index-v2.yaml"
 ----
 
 == Development

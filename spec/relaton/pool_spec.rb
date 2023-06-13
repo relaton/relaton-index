@@ -7,16 +7,16 @@ describe Relaton::Index::Pool do
     context "#type" do
       let(:idx) { double("idx") }
       before do
-        expect(Relaton::Index::Type).to receive(:new).with("ISO", :url, :file).and_return idx
+        expect(Relaton::Index::Type).to receive(:new).with("ISO", :url, :file, :keys).and_return idx
       end
 
       it "create new Type" do
-        expect(subject.type("ISO", url: :url, file: :file)).to be idx
+        expect(subject.type("ISO", url: :url, file: :file, id_keys: :keys)).to be idx
       end
 
       it "return existing Type" do
         expect(idx).to receive(:actual?).with(url: :url, file: :file).and_return true
-        subject.type("ISO", url: :url, file: :file)
+        subject.type("ISO", url: :url, file: :file, id_keys: :keys)
         expect(subject.type(:ISO, url: :url, file: :file)).to be idx
       end
     end

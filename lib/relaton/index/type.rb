@@ -11,10 +11,10 @@ module Relaton
       # @param [String, nil] url external URL to index, used to fetch index for searching files
       # @param [String, nil] file output file name
       #
-      def initialize(type, url = nil, file = nil)
+      def initialize(type, url = nil, file = nil, id_keys = nil)
         @file = file
         filename = file || Index.config.filename
-        @file_io = FileIO.new type.to_s.downcase, url, filename
+        @file_io = FileIO.new type.to_s.downcase, url, filename, id_keys
       end
 
       def index
