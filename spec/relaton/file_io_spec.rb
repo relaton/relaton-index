@@ -62,20 +62,41 @@ describe Relaton::Index::FileIO do
       end
     end
 
-    it "#fetch_and_save" do
-      subject.instance_variable_set(:@url, "url")
-      uri = double("uri")
-      expect(uri).to receive(:open).and_return :resp
-      expect(URI).to receive(:parse).with("url").and_return uri
-      entry = double("entry")
-      yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
-      expect(entry).to receive_message_chain(:get_input_stream, :read).and_return yaml
-      zip = double("zip")
-      expect(zip).to receive(:get_next_entry).and_return entry
-      expect(Zip::InputStream).to receive(:new).with(:resp).and_return zip
-      index = [{ file: "data/1.yaml", id: 1 }]
-      expect(subject).to receive(:save).with(index)
-      expect(subject.fetch_and_save).to eq index
+    context "#fetch_and_save" do
+      before do
+        subject.instance_variable_set(:@url, "url")
+        uri = double("uri")
+        expect(uri).to receive(:open).and_return :resp
+        expect(URI).to receive(:parse).with("url").and_return uri
+        entry = double("entry")
+        yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
+        expect(entry).to receive_message_chain(:get_input_stream, :read).and_return yaml
+        zip = double("zip")
+        expect(zip).to receive(:get_next_entry).and_return entry
+        expect(Zip::InputStream).to receive(:new).with(:resp).and_return zip
+      end
+
+      it "success" do
+        index = [{ file: "data/1.yaml", id: 1 }]
+        expect(subject).to receive(:save).with(index)
+        expect do
+          expect(subject.fetch_and_save).to eq index
+        end.to output(/Downloaded index from url/).to_stderr
+      end
+
+      it "wrong index structure" do
+        expect(subject).to receive(:check_format).and_return false
+        expect do
+          expect(subject.fetch_and_save).to be_nil
+        end.to output(/Wrong structure of newly downloaded file/).to_stderr
+      end
+
+      it "fails to parse yaml" do
+        expect(YAML).to receive(:safe_load).and_raise Psych::SyntaxError.new("", 1, 1, 0, nil, nil)
+        expect do
+          expect(subject.fetch_and_save).to be_nil
+        end.to output(/YAML parsing error when reading newly downloaded file/).to_stderr
+      end
     end
 
     context "#read_file" do
@@ -94,7 +115,33 @@ describe Relaton::Index::FileIO do
       it "fail to load yaml" do
         wrong_yaml = "---\n- :id: :file: data/1.yaml\n"
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
-        expect(subject.read_file).to be_nil
+        expect do
+          expect(subject.read_file).to eq []
+        end.to output(/YAML parsing error when reading file index\.yaml/).to_stderr
+      end
+
+      it "wrong index structure" do
+        wrong_yaml = "---\n- :id: 1\n  :fl: data/1.yaml\n"
+        expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
+        expect do
+          expect(subject.read_file).to eq []
+        end.to output(/Wrong structure of the file/).to_stderr
+      end
+    end
+
+    context "#warn_local_index_error" do
+      it "URL is set" do
+        subject.instance_variable_set(:@url, "url")
+        expect do
+          expect(subject.warn_local_index_error("")).to be_nil
+        end.to output(/file corrupt, re-downloading from url/).to_stderr
+      end
+
+      it "URL is not set" do
+        expect(subject).to receive(:remove).and_return []
+        expect do
+          expect(subject.warn_local_index_error("")).to eq []
+        end.to output(/file corrupt, removing it/).to_stderr
       end
     end
 

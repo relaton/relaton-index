@@ -104,7 +104,20 @@ module Relaton
 
         index = YAML.safe_load yaml, permitted_classes: [Symbol]
         return index if check_format index
+
+        warn_local_index_error "Wrong structure of the"
       rescue Psych::SyntaxError
+        warn_local_index_error "YAML parsing error when reading"
+      end
+
+      def warn_local_index_error(reason)
+        warn "[relaton] #{reason} file #{file}"
+        if url.is_a? String
+          warn "[relaton] Considering #{file} file corrupt, re-downloading from #{url}"
+        else
+          warn "[relaton] Considering #{file} file corrupt, removing it."
+          remove
+        end
       end
 
       #
@@ -118,7 +131,18 @@ module Relaton
         entry = zip.get_next_entry
         index = YAML.safe_load(entry.get_input_stream.read, permitted_classes: [Symbol])
         save index
-        index
+        warn "[relaton] Downloaded index from #{url}"
+        return index if check_format index
+
+        warn_remote_index_error "Wrong structure of"
+      rescue Psych::SyntaxError
+        warn_remote_index_error "YAML parsing error when reading"
+      end
+
+      def warn_remote_index_error(reason)
+        warn "[relaton] #{reason} newly downloaded file " \
+             "at #{file} #{url}, the remote index seems to be invalid." \
+             "Please report this issue at https://github.com/relaton/relaton-cli."
       end
 
       #
