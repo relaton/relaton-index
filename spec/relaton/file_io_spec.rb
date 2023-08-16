@@ -62,6 +62,22 @@ describe Relaton::Index::FileIO do
       end
     end
 
+    context "#check_basic_format" do
+      it "correct" do
+        index = [{ file: "data/1.yaml", id: { type: "TR", number: "1234" } }]
+        expect(subject.check_basic_format(index)).to be true
+      end
+
+      it "incorrect" do
+        index = [{ id: "1234" }]
+        expect(subject.check_basic_format(index)).to be false
+      end
+
+      it "index is not array" do
+        expect(subject.check_basic_format(nil)).to be false
+      end
+    end
+
     context "#fetch_and_save" do
       before do
         subject.instance_variable_set(:@url, "url")

@@ -76,10 +76,12 @@ module Relaton
       # @return [Boolean] <description>
       #
       def check_format(index)
-        cehck_basic_format(index) && check_id_format(index)
+        check_basic_format(index) && check_id_format(index)
       end
 
-      def cehck_basic_format(index)
+      def check_basic_format(index)
+        return false unless index.is_a? Array
+
         keys = %i[file id]
         index.all? { |item| item.respond_to?(:keys) && item.keys.sort == keys }
       end
