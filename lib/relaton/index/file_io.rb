@@ -92,7 +92,7 @@ module Relaton
         keys = index.each_with_object(Set.new) do |item, acc|
           acc.merge item[:id].keys if item[:id].is_a?(Hash)
         end
-        keys == @id_keys.to_set
+        keys.none? { |k| !@id_keys.include? k }
       end
 
       #
