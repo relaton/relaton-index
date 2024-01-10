@@ -130,6 +130,8 @@ module Relaton
       def fetch_and_save
         resp = URI(url).open
         zip = Zip::InputStream.new resp
+        resp.close
+        resp.unlink
         entry = zip.get_next_entry
         index = YAML.safe_load(entry.get_input_stream.read, permitted_classes: [Symbol])
         save index

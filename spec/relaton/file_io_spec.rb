@@ -82,14 +82,17 @@ describe Relaton::Index::FileIO do
       before do
         subject.instance_variable_set(:@url, "url")
         uri = double("uri")
-        expect(uri).to receive(:open).and_return :resp
+        resp = double("resp")
+        expect(resp).to receive(:close)
+        expect(resp).to receive(:unlink)
+        expect(uri).to receive(:open).and_return resp
         expect(URI).to receive(:parse).with("url").and_return uri
         entry = double("entry")
         yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
         expect(entry).to receive_message_chain(:get_input_stream, :read).and_return yaml
         zip = double("zip")
         expect(zip).to receive(:get_next_entry).and_return entry
-        expect(Zip::InputStream).to receive(:new).with(:resp).and_return zip
+        expect(Zip::InputStream).to receive(:new).with(resp).and_return zip
       end
 
       it "success" do
