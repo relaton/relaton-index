@@ -83,6 +83,8 @@ describe Relaton::Index::FileIO do
         subject.instance_variable_set(:@url, "url")
         uri = double("uri")
         resp = double("resp")
+        expect(resp).to receive(:respond_to?).with(:close).and_return true
+        expect(resp).to receive(:is_a?).with(Tempfile).and_return true
         expect(resp).to receive(:close)
         expect(resp).to receive(:unlink)
         expect(uri).to receive(:open).and_return resp
