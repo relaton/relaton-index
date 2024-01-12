@@ -128,12 +128,10 @@ module Relaton
       # @return [Array<Hash>] index
       #
       def fetch_and_save
-        resp = URI(url).open
+        resp = StringIO.new(URI(url).read)
         zip = Zip::InputStream.new resp
-        resp.close! if resp.is_a? Tempfile
         entry = zip.get_next_entry
         yaml = entry.get_input_stream.read
-        entry.zipfile.close! if entry.zipfile.is_a? Tempfile
         index = YAML.safe_load(yaml, permitted_classes: [Symbol])
         save index
         warn "[relaton-#{@dir}] Downloaded index from #{url}"
