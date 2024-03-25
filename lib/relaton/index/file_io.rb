@@ -113,13 +113,17 @@ module Relaton
       end
 
       def warn_local_index_error(reason)
-        warn "[relaton-#{@dir}] #{reason} file #{file}"
+        Util.info "#{reason} file `#{file}`", progname
         if url.is_a? String
-          warn "[relaton-#{@dir}] Considering #{file} file corrupt, re-downloading from #{url}"
+          Util.info "Considering `#{file}` file corrupt, re-downloading from `#{url}`", progname
         else
-          warn "[relaton-#{@dir}] Considering #{file} file corrupt, removing it."
+          Util.info "Considering `#{file}` file corrupt, removing it.", progname
           remove
         end
+      end
+
+      def progname
+        @progname ||= "relaton-#{@dir}"
       end
 
       #
@@ -134,7 +138,7 @@ module Relaton
         yaml = entry.get_input_stream.read
         index = YAML.safe_load(yaml, permitted_classes: [Symbol])
         save index
-        warn "[relaton-#{@dir}] Downloaded index from #{url}"
+        Util.info "Downloaded index from `#{url}`", progname
         return index if check_format index
 
         warn_remote_index_error "Wrong structure of"
@@ -143,9 +147,9 @@ module Relaton
       end
 
       def warn_remote_index_error(reason)
-        warn "[relaton-#{@dir}] #{reason} newly downloaded file " \
-             "at #{file} #{url}, the remote index seems to be invalid." \
-             "Please report this issue at https://github.com/relaton/relaton-cli."
+        Util.info "#{reason} newly downloaded file `#{file}` at `#{url}`, " \
+             "the remote index seems to be invalid. Please report this " \
+             "issue at https://github.com/relaton/relaton-cli.", progname
       end
 
       #
