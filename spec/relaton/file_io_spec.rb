@@ -92,21 +92,21 @@ describe Relaton::Index::FileIO do
         expect(subject).to receive(:save).with(index)
         expect do
           expect(subject.fetch_and_save).to eq index
-        end.to output(/Downloaded index from url/).to_stderr
+        end.to output(/\[relaton-iso\] INFO: Downloaded index from `url`/).to_stderr_from_any_process
       end
 
       it "wrong index structure" do
         expect(subject).to receive(:check_format).and_return false
         expect do
           expect(subject.fetch_and_save).to be_nil
-        end.to output(/Wrong structure of newly downloaded file/).to_stderr
+        end.to output(/\[relaton-iso\] INFO: Wrong structure of newly downloaded file/).to_stderr_from_any_process
       end
 
       it "fails to parse yaml" do
         expect(YAML).to receive(:safe_load).and_raise Psych::SyntaxError.new("", 1, 1, 0, nil, nil)
         expect do
           expect(subject.fetch_and_save).to be_nil
-        end.to output(/YAML parsing error when reading newly downloaded file/).to_stderr
+        end.to output(/YAML parsing error when reading newly downloaded file/).to_stderr_from_any_process
       end
     end
 
@@ -128,7 +128,9 @@ describe Relaton::Index::FileIO do
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
         expect do
           expect(subject.read_file).to eq []
-        end.to output(/\[relaton-iso\] YAML parsing error when reading file index\.yaml/).to_stderr
+        end.to output(
+          /\[relaton-iso\] INFO: YAML parsing error when reading file `index\.yaml`/,
+        ).to_stderr_from_any_process
       end
 
       it "wrong index structure" do
@@ -136,7 +138,10 @@ describe Relaton::Index::FileIO do
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return wrong_yaml
         expect do
           expect(subject.read_file).to eq []
-        end.to output(/\[relaton-iso\] Wrong structure of the file/).to_stderr
+        end.to output(
+          include("[relaton-iso] INFO: Wrong structure of the file `index.yaml`",
+                  "[relaton-iso] INFO: Considering `index.yaml` file corrupt, removing it."),
+        ).to_stderr_from_any_process
       end
     end
 
@@ -144,15 +149,21 @@ describe Relaton::Index::FileIO do
       it "URL is set" do
         subject.instance_variable_set(:@url, "url")
         expect do
-          expect(subject.warn_local_index_error("")).to be_nil
-        end.to output(/\[relaton-iso\] Considering index\.yaml file corrupt, re-downloading from url/).to_stderr
+          expect(subject.warn_local_index_error("Wrong")).to be_nil
+        end.to output(
+          include("[relaton-iso] INFO: Wrong file `index.yaml`",
+                  "[relaton-iso] INFO: Considering `index.yaml` file corrupt, re-downloading from `url`"),
+        ).to_stderr_from_any_process
       end
 
       it "URL is not set" do
         expect(subject).to receive(:remove).and_return []
         expect do
-          expect(subject.warn_local_index_error("")).to eq []
-        end.to output(/\[relaton-iso\] Considering index\.yaml file corrupt, removing it/).to_stderr
+          expect(subject.warn_local_index_error("Corrupt")).to eq []
+        end.to output(
+          include("[relaton-iso] INFO: Corrupt file `index.yaml`",
+                  "[relaton-iso] INFO: Considering `index.yaml` file corrupt, removing it."),
+        ).to_stderr_from_any_process
       end
     end
 
