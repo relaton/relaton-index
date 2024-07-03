@@ -1,3 +1,5 @@
+require "uri"
+
 describe Relaton::Index::FileIO do
   it "create FileIO" do
     fio = described_class.new("iso", :url, :filename, nil)
