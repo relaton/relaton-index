@@ -18,7 +18,7 @@ describe Relaton::Index::Type do
   end
 
   context "instace methods" do
-    let(:index) { [{ id: "id1", file: "file1" }] }
+    let(:index) { [] }
     let(:file_io) { double("file_io", read: index) }
 
     subject do
@@ -47,26 +47,31 @@ describe Relaton::Index::Type do
     end
 
     context "#add_or_update" do
+      let(:id) { TestIdentifier.create(number: 1, publisher: "ISO") }
+
       it "add" do
-        subject.add_or_update "id2", "file2"
-        expect(index).to eq [{ id: "id1", file: "file1" }, { id: "id2", file: "file2" }]
+        subject.add_or_update id, "file2"
+        expect(index).to eq [{ id: id, file: "file2" }]
       end
 
       it "update" do
-        subject.add_or_update "id1", "file2"
-        expect(index).to eq [{ id: "id1", file: "file2" }]
+        subject.add_or_update id, "file2"
+        expect(index).to eq [{ id: id, file: "file2" }]
+        subject.add_or_update id, "file3"
+        expect(index).to eq [{ id: id, file: "file3" }]
       end
     end
 
     context "#search" do
-      before { index << { id: "id2", file: "file2" } }
+      let(:id) { TestIdentifier.create(number: 2, publisher: "ISO") }
+      let(:index) { [{ id: id, file: "file2" }] }
 
       it "withou block" do
-        expect(subject.search("id2")).to eq [{ id: "id2", file: "file2" }]
+        expect(subject.search(id)).to eq [{ id: id, file: "file2" }]
       end
 
       it "with block" do
-        expect(subject.search { |i| i[:id] == "id1" }).to eq [{ id: "id1", file: "file1" }]
+        expect(subject.search { |i| i[:id] == id }).to eq [{ id: id, file: "file2" }]
       end
     end
 
