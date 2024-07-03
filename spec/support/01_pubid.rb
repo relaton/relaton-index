@@ -1,0 +1,22 @@
+require "pubid-core"
+
+module TestIdentifier
+  class << self
+    include Pubid::Core::Identifier
+  end
+end
+
+class DummyDefaultType < Pubid::Core::Identifier::Base
+  extend Forwardable
+  def_delegators 'DummyDefaultType', :type
+
+  def self.type
+    { key: :default, title: "Default Type" }
+  end
+end
+
+
+config = Pubid::Core::Configuration.new
+config.default_type = DummyDefaultType
+
+TestIdentifier.set_config(config)

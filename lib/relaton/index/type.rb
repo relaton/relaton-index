@@ -38,7 +38,7 @@ module Relaton
       #
       # Add or update index item
       #
-      # @param [String] id document ID
+      # @param [Pubid::Core::Identifier::Base] id document ID
       # @param [String] file file name of the document
       #
       # @return [void]
@@ -61,7 +61,7 @@ module Relaton
       #
       def search(id = nil)
         index.select do |i|
-          block_given? ? yield(i) : i[:id].include?(id)
+          block_given? ? yield(i) : i[:id] == id
         end
       end
 
