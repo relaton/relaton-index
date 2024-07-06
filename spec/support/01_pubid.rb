@@ -9,6 +9,9 @@ end
 class DummyDefaultType < Pubid::Core::Identifier::Base
   extend Forwardable
   def_delegators 'DummyDefaultType', :type
+  def to_s
+    "#{@publisher} #{@number}"
+  end
 
   def self.type
     { key: :default, title: "Default Type" }
