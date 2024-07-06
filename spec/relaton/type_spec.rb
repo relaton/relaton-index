@@ -63,15 +63,35 @@ describe Relaton::Index::Type do
     end
 
     context "#search" do
-      let(:id) { TestIdentifier.create(number: 2, publisher: "ISO") }
-      let(:index) { [{ id: id, file: "file2" }] }
+      let(:id1) { TestIdentifier.create(number: 1, publisher: "ISO") }
+      let(:id2) { TestIdentifier.create(number: 2, publisher: "ISO") }
+      let(:index) { [{ id: id1, file: "file1" }, { id: id2, file: "file2" }] }
 
-      it "withou block" do
-        expect(subject.search(id)).to eq [{ id: id, file: "file2" }]
+      context "without block" do
+        context "when pubid provided" do
+          it "returns related index row" do
+            expect(subject.search(id1)).to eq [{ id: id1, file: "file1" }]
+          end
+        end
+
+        context "when string provided" do
+          it "returns related index row" do
+            expect(subject.search("ISO 2")).to eq [{ id: id2, file: "file2" }]
+          end
+
+          context "when string match only partially" do
+            it "returns all matching index rows" do
+              expect(subject.search("ISO")).to eq [{ id: id1, file: "file1" },
+                                                   { id: id2, file: "file2" }]
+            end
+          end
+        end
       end
 
-      it "with block" do
-        expect(subject.search { |i| i[:id] == id }).to eq [{ id: id, file: "file2" }]
+      context "with block" do
+        it "returns entries matching with provided block conditions" do
+          expect(subject.search { |i| i[:id] == id1 }).to eq [{ id: id1, file: "file1" }]
+        end
       end
     end
 

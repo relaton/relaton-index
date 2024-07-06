@@ -55,13 +55,13 @@ module Relaton
       #
       # Search index for a given ID
       #
-      # @param [Comparable] id ID to search for
+      # @param [String, Pubid::Core::Identifier::Base] id ID to search for
       #
       # @return [Array<Hash>] search results
       #
       def search(id = nil)
         index.select do |i|
-          block_given? ? yield(i) : i[:id] == id
+          block_given? ? yield(i) : id.is_a?(String) ? i[:id].to_s.include?(id) : i[:id] == id
         end
       end
 
