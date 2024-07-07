@@ -1,6 +1,8 @@
 require "uri"
 
 describe Relaton::Index::FileIO do
+  before { Relaton::Index.config.pubid_class = TestIdentifier }
+
   it "create FileIO" do
     fio = described_class.new("iso", :url, :filename, nil)
     expect(fio.instance_variable_get(:@dir)).to eq "iso"
@@ -13,6 +15,15 @@ describe Relaton::Index::FileIO do
       subj = described_class.new("iso", nil, "index.yaml", nil)
       subj.instance_variable_set(:@file, "index.yaml")
       subj
+    end
+
+    context "#deserialize_pubid" do
+      subject { described_class.new("iso", nil, "index.yaml", nil).deserialize_pubid(index) }
+      let(:index) { [{ id: { publisher: "ISO", number: 1 } }] }
+
+      it "deserealizes pubid objects" do
+        expect(subject.first[:id]).to eq(TestIdentifier.create(publisher: "ISO", number: 1))
+      end
     end
 
     context "#read" do
@@ -120,9 +131,9 @@ describe Relaton::Index::FileIO do
       end
 
       it "file exists" do
-        yaml = "---\n- :id: 1\n  :file: data/1.yaml\n"
+        yaml = [{ file: "data/1.yaml", id: { publisher: "ISO", number: 1 } }].to_yaml
         expect(Relaton::Index::FileStorage).to receive(:read).with("index.yaml").and_return yaml
-        expect(subject.read_file).to eq [{ file: "data/1.yaml", id: 1 }]
+        expect(subject.read_file).to eq [{ file: "data/1.yaml", id: TestIdentifier.create(publisher: "ISO", number: 1) }]
       end
 
       it "fail to load yaml" do
@@ -186,9 +197,11 @@ describe Relaton::Index::FileIO do
       end
     end
 
-    it "#save" do
-      expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id: '1'\n  :file: data/1.yaml\n")
-      subject.save [{ id: "1", file: "data/1.yaml" }]
+    context "#save" do
+      it do
+        expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id: '1'\n  :file: data/1.yaml\n")
+        subject.save [{ id: "1", file: "data/1.yaml" }]
+      end
     end
 
     it "#remove" do

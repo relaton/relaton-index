@@ -105,11 +105,15 @@ module Relaton
         return unless yaml
 
         index = YAML.safe_load yaml, permitted_classes: [Symbol]
-        return index if check_format index
+        return deserialize_pubid(index) if check_format index
 
         warn_local_index_error "Wrong structure of the"
       rescue Psych::SyntaxError
         warn_local_index_error "YAML parsing error when reading"
+      end
+
+      def deserialize_pubid(index)
+        index.map { |r| { id: Index.config.pubid_class.create(**r[:id]), file: r[:file] } }
       end
 
       def warn_local_index_error(reason)
