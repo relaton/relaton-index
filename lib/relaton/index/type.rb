@@ -61,7 +61,15 @@ module Relaton
       #
       def search(id = nil)
         index.select do |i|
-          block_given? ? yield(i) : id.is_a?(String) ? i[:id].to_s.include?(id) : i[:id] == id
+          if block_given?
+            yield(i)
+          else
+            if i[:id].is_a?(String)
+              id.is_a?(String) ? i[:id].include?(id) : i[:id].include?(id.to_s)
+            else
+              id.is_a?(String) ? i[:id].to_s.include?(id) : i[:id] == id
+            end
+          end
         end
       end
 
