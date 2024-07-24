@@ -113,6 +113,8 @@ module Relaton
       end
 
       def deserialize_pubid(index)
+        return index unless Index.config.pubid_class
+
         index.map { |r| { id: Index.config.pubid_class.create(**r[:id]), file: r[:file] } }
       end
 

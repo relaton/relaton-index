@@ -24,6 +24,14 @@ describe Relaton::Index::FileIO do
       it "deserealizes pubid objects" do
         expect(subject.first[:id]).to eq(TestIdentifier.create(publisher: "ISO", number: 1))
       end
+
+      context "when pubid_class is not specified" do
+        before { Relaton::Index.config.pubid_class = nil }
+
+        it "returns original index values" do
+          expect(subject.first[:id]).to eq(index.first[:id])
+        end
+      end
     end
 
     context "#read" do
