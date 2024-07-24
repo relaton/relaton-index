@@ -93,6 +93,24 @@ describe Relaton::Index::Type do
           expect(subject.search { |i| i[:id] == id1 }).to eq [{ id: id1, file: "file1" }]
         end
       end
+
+      context "when provided index in old format" do
+        let(:index) { [{ id: "ISO 1", file: "file1" }, { id: "ISO 2", file: "file2" }] }
+
+        context "without block" do
+          context "when pubid provided" do
+            it "returns related index row" do
+              expect(subject.search(id1)).to eq [{ id: "ISO 1", file: "file1" }]
+            end
+          end
+
+          context "when string provided" do
+            it "returns related index row" do
+              expect(subject.search("ISO 2")).to eq [{ id: "ISO 2", file: "file2" }]
+            end
+          end
+        end
+      end
     end
 
     it "#save" do
