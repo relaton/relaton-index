@@ -10,11 +10,12 @@ module Relaton
       # @param [String, Symbol] type type of index (ISO, IEC, etc.)
       # @param [String, nil] url external URL to index, used to fetch index for searching files
       # @param [String, nil] file output file name
+      # @param [Pubid::Core::Identifier::Base] pubid class for deserialization
       #
-      def initialize(type, url = nil, file = nil, id_keys = nil)
+      def initialize(type, url = nil, file = nil, id_keys = nil, pubid_class = nil)
         @file = file
         filename = file || Index.config.filename
-        @file_io = FileIO.new type.to_s.downcase, url, filename, id_keys
+        @file_io = FileIO.new type.to_s.downcase, url, filename, id_keys, pubid_class
       end
 
       def index

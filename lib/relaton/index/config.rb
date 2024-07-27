@@ -4,7 +4,7 @@ module Relaton
     # Configuration class for Relaton::Index
     #
     class Config
-      attr_reader :storage, :storage_dir, :filename, :pubid_class
+      attr_reader :storage, :storage_dir, :filename
 
       #
       # Set default values
@@ -46,10 +46,6 @@ module Relaton
       #
       def filename=(filename)
         @filename = filename
-      end
-
-      def pubid_class=(klass)
-        @pubid_class = klass
       end
     end
   end

@@ -6,7 +6,7 @@ module Relaton
     # In index mode url should be nil.
     #
     class FileIO
-      attr_reader :url
+      attr_reader :url, :pubid_class
 
       #
       # Initialize FileIO
@@ -17,12 +17,14 @@ module Relaton
       #     and save it to the storage (if not exists, or older than 24 hours)
       #   if true then the index is read from the storage (used to remove index file)
       #   if nil then the fiename is used to read and write file (used to create indes in GH actions)
+      # @param [Pubid::Core::Identifier::Base] pubid class for deserialization
       #
-      def initialize(dir, url, filename, id_keys)
+      def initialize(dir, url, filename, id_keys, pubid_class = nil)
         @dir = dir
         @url = url
         @filename = filename
         @id_keys = id_keys || []
+        @pubid_class = pubid_class
       end
 
       #
@@ -113,9 +115,9 @@ module Relaton
       end
 
       def deserialize_pubid(index)
-        return index unless Index.config.pubid_class
+        return index unless @pubid_class
 
-        index.map { |r| { id: Index.config.pubid_class.create(**r[:id]), file: r[:file] } }
+        index.map { |r| { id: @pubid_class.create(**r[:id]), file: r[:file] } }
       end
 
       def warn_local_index_error(reason)
