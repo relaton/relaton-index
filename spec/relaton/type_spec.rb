@@ -1,28 +1,12 @@
 describe Relaton::Index::Type do
   before { Relaton::Index.instance_variable_set(:@config, nil) }
 
-  context "create Type" do
-    it "with default filename" do
-      file_io = double("file_io")
-      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml", nil).and_return file_io
-      idx = described_class.new(:ISO, :url)
-      expect(idx.instance_variable_get(:@file_io)).to be file_io
-    end
-
-    it "with custom filename" do
-      file_io = double("file_io")
-      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, :file, nil).and_return file_io
-      idx = described_class.new(:ISO, :url, :file)
-      expect(idx.instance_variable_get(:@file_io)).to be file_io
-    end
-  end
-
   context "instace methods" do
     let(:index) { [] }
     let(:file_io) { double("file_io", read: index) }
 
     subject do
-      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml", nil).and_return file_io
+      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml", nil, nil).and_return file_io
       described_class.new(:ISO, :url, "index.yaml")
     end
 

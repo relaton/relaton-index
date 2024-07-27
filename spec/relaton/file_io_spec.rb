@@ -1,8 +1,6 @@
 require "uri"
 
 describe Relaton::Index::FileIO do
-  before { Relaton::Index.config.pubid_class = TestIdentifier }
-
   it "create FileIO" do
     fio = described_class.new("iso", :url, :filename, nil)
     expect(fio.instance_variable_get(:@dir)).to eq "iso"
@@ -12,13 +10,14 @@ describe Relaton::Index::FileIO do
 
   context "instace methods" do
     subject do
-      subj = described_class.new("iso", nil, "index.yaml", nil)
+      subj = described_class.new("iso", nil, "index.yaml", nil, pubid_class)
       subj.instance_variable_set(:@file, "index.yaml")
       subj
     end
+    let(:pubid_class) { TestIdentifier }
 
     context "#deserialize_pubid" do
-      subject { described_class.new("iso", nil, "index.yaml", nil).deserialize_pubid(index) }
+      subject { described_class.new("iso", nil, "index.yaml", nil, pubid_class).deserialize_pubid(index) }
       let(:index) { [{ id: { publisher: "ISO", number: 1 } }] }
 
       it "deserealizes pubid objects" do
@@ -26,7 +25,7 @@ describe Relaton::Index::FileIO do
       end
 
       context "when pubid_class is not specified" do
-        before { Relaton::Index.config.pubid_class = nil }
+        let(:pubid_class) { nil }
 
         it "returns original index values" do
           expect(subject.first[:id]).to eq(index.first[:id])
