@@ -206,8 +206,8 @@ describe Relaton::Index::FileIO do
 
     context "#save" do
       it do
-        expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id: '1'\n  :file: data/1.yaml\n")
-        subject.save [{ id: "1", file: "data/1.yaml" }]
+        expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id:\n    :publisher: ISO\n    :number: '1'\n  :file: data/1.yaml\n")
+        subject.save [{ id: TestIdentifier.create(publisher: "ISO", number: 1), file: "data/1.yaml" }]
       end
     end
 
