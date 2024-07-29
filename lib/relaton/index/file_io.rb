@@ -164,7 +164,8 @@ module Relaton
       # @return [void]
       #
       def save(index)
-        Index.config.storage.write file, index.to_yaml
+        Index.config.storage.write file,
+          index.map { |item| item.transform_values { |value| value.is_a?(Pubid::Core::Identifier::Base) ? value.to_h : value } }.to_yaml
       end
 
       #
