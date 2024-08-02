@@ -90,7 +90,7 @@ jobs:
       - uses: peter-evans/repository-dispatch@v3
         name: Tests passed
         with:
-          token: ${{ secrets.RELATON_CI_PAT_TOKEN }}
+          token: ${{ secrets.RELATON_CI_PAT_TOKEN || github.token }}
           repository: ${{ github.repository }}
           event-type: tests-passed
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "type": "tests-passed"}'
@@ -99,7 +99,7 @@ jobs:
         name: Repository ready for release
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.RELATON_CI_PAT_TOKEN }}
+          token: ${{ secrets.RELATON_CI_PAT_TOKEN || github.token }}
           repository: ${{ github.repository }}
           event-type: do-release
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "type": "do-release"}'
