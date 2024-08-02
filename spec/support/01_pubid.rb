@@ -1,5 +1,3 @@
-require "pubid-core"
-
 module TestIdentifier
   class << self
     include Pubid::Core::Identifier
