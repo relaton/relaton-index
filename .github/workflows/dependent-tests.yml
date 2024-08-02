@@ -61,14 +61,17 @@ jobs:
       shell: python
       run: |
         import fileinput
+        import glob
         import sys
         import os
         print("Python version:", sys.version)
-        with fileinput.FileInput('relaton_${{ matrix.flavor }}.gemspec', inplace=True) as file:
+        gemspec = glob.glob('relaton*.gemspec')[0]
+        print("python version:", sys.version, "found:", gemspec)
+        with fileinput.FileInput(gemspec, inplace=True) as file:
           for line in file:
             if 'relaton-index' not in line:
               print(line, end='')
-        print("'relaton-index' removed from relaton_${{ matrix.flavor }}.gemspec")
+        print("'relaton-index' removed from", gemspec)
         if os.path.exists("Gemfile.lock"):
           os.remove("Gemfile.lock")
           print("Gemfile.lock dropped")
