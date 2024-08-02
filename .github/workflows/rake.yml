@@ -10,5 +10,5 @@ jobs:
   rake:
     uses: relaton/support/.github/workflows/rake.yml@main
     with:
-      tests-passed-event: pre-integration-tests
+      tests-passed-event: integration-tests
       release-event: pre-release

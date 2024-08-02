@@ -4,7 +4,7 @@ on:
   pull_request:
   workflow_dispatch:
   repository_dispatch:
-    types: [ pre-release, pre-integration-tests ]
+    types: [ pre-release, integration-tests ]
 
 jobs:
   build-matrix:
