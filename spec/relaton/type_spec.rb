@@ -2,13 +2,7 @@ describe Relaton::Index::Type do
   before { Relaton::Index.instance_variable_set(:@config, nil) }
 
   context "instace methods" do
-    let(:index) { [] }
-    let(:file_io) { double("file_io", read: index) }
-
-    subject do
-      expect(Relaton::Index::FileIO).to receive(:new).with("iso", :url, "index.yaml", nil, nil).and_return file_io
-      described_class.new(:ISO, :url, "index.yaml")
-    end
+    subject { described_class.new(:ISO, :url, "index.yaml") }
 
     context "#actual?" do
       it "no url and file" do
@@ -16,7 +10,7 @@ describe Relaton::Index::Type do
       end
 
       it "new url" do
-        expect(file_io).to receive(:url).and_return :old
+        expect(subject.instance_variable_get(:@file_io)).to receive(:url).and_return :old
         expect(subject.actual?(url: :new)).to be false
       end
 
@@ -25,7 +19,6 @@ describe Relaton::Index::Type do
       end
 
       it "same url and file" do
-        expect(file_io).to receive(:url).and_return :url
         expect(subject.actual?(url: :url, file: "index.yaml")).to be true
       end
     end
@@ -35,21 +28,25 @@ describe Relaton::Index::Type do
 
       it "add" do
         subject.add_or_update id, "file2"
-        expect(index).to eq [{ id: id, file: "file2" }]
+        expect(subject.index).to eq [{ id: id, file: "file2" }]
       end
 
       it "update" do
         subject.add_or_update id, "file2"
-        expect(index).to eq [{ id: id, file: "file2" }]
+        expect(subject.index).to eq [{ id: id, file: "file2" }]
         subject.add_or_update id, "file3"
-        expect(index).to eq [{ id: id, file: "file3" }]
+        expect(subject.index).to eq [{ id: id, file: "file3" }]
       end
     end
 
     context "#search" do
       let(:id1) { TestIdentifier.create(number: 1, publisher: "ISO") }
       let(:id2) { TestIdentifier.create(number: 2, publisher: "ISO") }
-      let(:index) { [{ id: id1, file: "file1" }, { id: id2, file: "file2" }] }
+
+      before do
+        subject.add_or_update id1, "file1"
+        subject.add_or_update id2, "file2"
+      end
 
       context "without block" do
         context "when pubid provided" do
@@ -97,14 +94,21 @@ describe Relaton::Index::Type do
       end
     end
 
-    it "#save" do
-      expect(file_io).to receive(:save).with(index)
-      subject.instance_variable_set(:@index, index)
-      subject.save
+    context "#save" do
+      it "save index" do
+        expect(File).to receive(:write).with(/index\.yaml$/, subject.index.to_yaml, encoding: "UTF-8")
+        subject.save
+      end
+
+      it "save empty index" do
+        expect(File).to receive(:write).with(/index\.yaml$/, [].to_yaml, encoding: "UTF-8")
+        subject.save
+      end
     end
 
     it "#remove_file" do
-      expect(file_io).to receive(:remove)
+      expect(File).to receive(:exist?).with(/index\.yaml/).and_return true
+      expect(File).to receive(:delete).with(/index\.yaml$/)
       subject.remove_file
     end
 

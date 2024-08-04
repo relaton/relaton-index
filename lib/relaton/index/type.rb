@@ -80,7 +80,7 @@ module Relaton
       # @return [void]
       #
       def save
-        @file_io.save @index
+        @file_io.save(@index || [])
       end
 
       #
