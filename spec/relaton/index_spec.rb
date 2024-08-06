@@ -11,11 +11,9 @@ RSpec.describe Relaton::Index do
     expect(Relaton::Index::VERSION).not_to be nil
   end
 
-  it "create Pool" do
-    pool = double("pool")
-    expect(pool).to receive(:type).with("ISO", url: :url, file: :file, id_keys: :keys).and_return :idx
-    expect(Relaton::Index::Pool).to receive(:new).and_return pool
-    expect(described_class.find_or_create("ISO", url: :url, file: :file, id_keys: :keys)).to eq :idx
+  context "#find_or_create" do
+    subject { described_class.find_or_create("ISO", url: :url, file: :file, id_keys: :keys) }
+    it { is_expected.to be_a(Relaton::Index::Type) }
   end
 
   it "remove local index" do
