@@ -22,7 +22,7 @@ module Relaton
         if @pool[type.upcase.to_sym]&.actual?(**args)
           @pool[type.upcase.to_sym]
         else
-          @pool[type.upcase.to_sym] = Type.new(type, args[:url], args[:file], args[:id_keys])
+          @pool[type.upcase.to_sym] = Type.new(type, args[:url], args[:file], args[:id_keys], args[:pubid_class])
         end
       end
 

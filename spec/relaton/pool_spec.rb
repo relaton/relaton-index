@@ -5,19 +5,26 @@ describe Relaton::Index::Pool do
 
   context "instace methods" do
     context "#type" do
-      let(:idx) { double("idx") }
-      before do
-        expect(Relaton::Index::Type).to receive(:new).with("ISO", :url, :file, :keys).and_return idx
+      context "when getting specific type first time" do
+        subject { described_class.new.type("ISO", url: :url, file: :file, id_keys: :keys) }
+
+        it { expect(subject).to be_a(Relaton::Index::Type) }
       end
 
-      it "create new Type" do
-        expect(subject.type("ISO", url: :url, file: :file, id_keys: :keys)).to be idx
+      context "when getting already created specific type" do
+        it "returns existing Type" do
+          # create type first time
+          type = subject.type("ISO", url: :url, file: :file, id_keys: :keys)
+          expect(subject.type(:ISO, url: :url, file: :file)).to eq(type)
+        end
       end
 
-      it "return existing Type" do
-        expect(idx).to receive(:actual?).with(url: :url, file: :file).and_return true
-        subject.type("ISO", url: :url, file: :file, id_keys: :keys)
-        expect(subject.type(:ISO, url: :url, file: :file)).to be idx
+      context "when same type, but different arguments" do
+        it "creates new Type" do
+          # create type first time
+          type = subject.type("ISO", url: :url, file: :file, id_keys: :keys)
+          expect(subject.type(:ISO, url: :url2, file: :file2)).not_to eq(type)
+        end
       end
     end
 
