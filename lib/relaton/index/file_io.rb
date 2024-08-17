@@ -106,12 +106,7 @@ module Relaton
         yaml = Index.config.storage.read(file)
         return unless yaml
 
-        index = YAML.safe_load yaml, permitted_classes: [Symbol]
-        return deserialize_pubid(index) if check_format index
-
-        warn_local_index_error "Wrong structure of the"
-      rescue Psych::SyntaxError
-        warn_local_index_error "YAML parsing error when reading"
+        load_index(yaml) || []
       end
 
       def deserialize_pubid(index)
@@ -134,6 +129,23 @@ module Relaton
         @progname ||= "relaton-#{@dir}"
       end
 
+      def load_index(yaml, save = false)
+        index = YAML.safe_load(yaml, permitted_classes: [Symbol])
+        save index if save
+        return deserialize_pubid(index) if check_format index
+
+        if save
+          warn_remote_index_error "Wrong structure of"
+        else
+          warn_local_index_error "Wrong structure of"
+        end
+      rescue Psych::SyntaxError
+        if save
+          warn_remote_index_error "YAML parsing error when reading"
+        else
+          warn_local_index_error "YAML parsing error when reading"
+        end
+      end
       #
       # Fetch index from external repository and save it to storage
       #
@@ -144,14 +156,8 @@ module Relaton
         zip = Zip::InputStream.new resp
         entry = zip.get_next_entry
         yaml = entry.get_input_stream.read
-        index = YAML.safe_load(yaml, permitted_classes: [Symbol])
-        save index
         Util.info "Downloaded index from `#{url}`", progname
-        return index if check_format index
-
-        warn_remote_index_error "Wrong structure of"
-      rescue Psych::SyntaxError
-        warn_remote_index_error "YAML parsing error when reading"
+        load_index(yaml, save = true)
       end
 
       def warn_remote_index_error(reason)

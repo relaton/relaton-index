@@ -102,10 +102,13 @@ describe Relaton::Index::FileIO do
       before do
         subject.instance_variable_set(:@url, "url")
 
-        zipped = File.binread("spec/assets/index1.zip")
+        zipped = File.binread(index_file)
         expect_any_instance_of(URI::Generic).to receive(:read)
           .and_return(zipped)
       end
+
+      let(:index_file) { "spec/assets/index1.zip" }
+      let(:pubid_class) { nil }
 
       it "success" do
         index = [{ file: "data/1.yaml", id: 1 }]
@@ -113,6 +116,16 @@ describe Relaton::Index::FileIO do
         expect do
           expect(subject.fetch_and_save).to eq index
         end.to output(/\[relaton-iso\] INFO: Downloaded index from `url`/).to_stderr_from_any_process
+      end
+
+      context "when new index and pubid_class provided" do
+        let(:pubid_class) { TestIdentifier }
+        let(:index_file) { "spec/assets/index2.zip" }
+
+        it "returns id as desearialized pubid" do
+          expect(subject.fetch_and_save).to eq(
+            [{ file: "data/1.yaml", id: TestIdentifier.create(publisher: "ISO", number: 1) }])
+        end
       end
 
       it "wrong index structure" do
@@ -159,7 +172,7 @@ describe Relaton::Index::FileIO do
         expect do
           expect(subject.read_file).to eq []
         end.to output(
-          include("[relaton-iso] INFO: Wrong structure of the file `index.yaml`",
+          include("[relaton-iso] INFO: Wrong structure of file `index.yaml`",
                   "[relaton-iso] INFO: Considering `index.yaml` file corrupt, removing it."),
         ).to_stderr_from_any_process
       end
