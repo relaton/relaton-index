@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "pubid-core", "~> 1.12.9"
+  spec.add_dependency "pubid-core", "~> 1.15.0"
   spec.add_dependency "relaton-logger", "~> 0.2.0"
   spec.add_dependency "rubyzip", "~> 2.3.0"
 

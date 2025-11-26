@@ -153,9 +153,11 @@ module Relaton
       #
       def fetch_and_save
         resp = StringIO.new(URI(url).read)
-        zip = Zip::InputStream.new resp
-        entry = zip.get_next_entry
-        yaml = entry.get_input_stream.read
+        yaml = nil
+        Zip::File.open_buffer(resp) do |zip|
+          entry = zip.entries.first
+          yaml = entry.get_input_stream.read
+        end
         Util.info "Downloaded index from `#{url}`", progname
         load_index(yaml, save = true)
       end

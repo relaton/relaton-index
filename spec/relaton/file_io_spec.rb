@@ -103,8 +103,7 @@ describe Relaton::Index::FileIO do
         subject.instance_variable_set(:@url, "url")
 
         zipped = File.binread(index_file)
-        expect_any_instance_of(URI::Generic).to receive(:read)
-          .and_return(zipped)
+        expect_any_instance_of(URI::Generic).to receive(:read).and_return(zipped)
       end
 
       let(:index_file) { "spec/assets/index1.zip" }
@@ -129,6 +128,7 @@ describe Relaton::Index::FileIO do
       end
 
       it "wrong index structure" do
+        expect(subject).to receive(:save)
         expect(subject).to receive(:check_format).and_return false
         expect do
           expect(subject.fetch_and_save).to be_nil
