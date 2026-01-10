@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Relaton Index is a library for indexing Relaton files."
   spec.homepage = "https://github.com/relaton/relaton-index"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.7.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "openssl", "~> 3.3.2"
   spec.add_dependency "pubid-core", "~> 1.15.0"
   spec.add_dependency "relaton-logger", "~> 0.2.0"
   spec.add_dependency "rubyzip", "~> 2.3.0"

@@ -60,6 +60,20 @@ describe Relaton::Index::FileIO do
         expect(subject).to receive(:read_file).and_return nil
         expect(subject.read).to eq []
       end
+
+      it "threadsafe" do
+        expect_any_instance_of(described_class).to receive(:fetch_and_save) do
+          sleep 0.1
+          expect_any_instance_of(described_class).to receive(:check_file).and_return []
+          []
+        end
+
+        Array.new(2) do
+          Thread.new do
+            described_class.new("iso", "url", "index.yaml", nil).read
+          end
+        end.each(&:join)
+      end
     end
 
     context "#check_file" do

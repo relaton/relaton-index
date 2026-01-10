@@ -8,6 +8,9 @@ module Relaton
     class FileIO
       attr_reader :url, :pubid_class
 
+      @@file_locks = {}
+      @@file_locks_mutex = Mutex.new
+
       #
       # Initialize FileIO
       #
@@ -39,7 +42,9 @@ module Relaton
       def read
         case url
         when String
-          check_file || fetch_and_save
+          with_file_lock do
+            check_file || fetch_and_save
+          end
         else
           read_file || []
         end
@@ -146,6 +151,7 @@ module Relaton
           warn_local_index_error "YAML parsing error when reading"
         end
       end
+
       #
       # Fetch index from external repository and save it to storage
       #
@@ -159,7 +165,7 @@ module Relaton
           yaml = entry.get_input_stream.read
         end
         Util.info "Downloaded index from `#{url}`", progname
-        load_index(yaml, save = true)
+        load_index(yaml, _save = true)
       end
 
       def warn_remote_index_error(reason)
@@ -176,8 +182,10 @@ module Relaton
       # @return [void]
       #
       def save(index)
-        Index.config.storage.write file,
-          index.map { |item| item.transform_values { |value| value.is_a?(Pubid::Core::Identifier::Base) ? value.to_h : value } }.to_yaml
+        yaml = index.map do |item|
+          item.transform_values { |value| value.is_a?(Pubid::Core::Identifier::Base) ? value.to_h : value }
+        end.to_yaml
+        Index.config.storage.write file, yaml
       end
 
       #
@@ -188,6 +196,16 @@ module Relaton
       def remove
         Index.config.storage.remove file
         []
+      end
+
+      private
+
+      def with_file_lock(&)
+        @@file_locks_mutex.synchronize do
+          @@file_locks[file] ||= Mutex.new
+        end
+
+        @@file_locks[file].synchronize(&)
       end
     end
   end
