@@ -114,10 +114,10 @@ describe Relaton::Index::FileIO do
 
     context "#fetch_and_save" do
       before do
-        subject.instance_variable_set(:@url, "url")
+        subject.instance_variable_set(:@url, "https://url.io/index.zip")
 
         zipped = File.binread(index_file)
-        expect_any_instance_of(URI::Generic).to receive(:read).and_return(zipped)
+        expect(Net::HTTP).to receive(:get).with(kind_of(URI::HTTPS)).and_return(zipped)
       end
 
       let(:index_file) { "spec/assets/index1.zip" }
@@ -128,7 +128,9 @@ describe Relaton::Index::FileIO do
         expect(subject).to receive(:save).with(index)
         expect do
           expect(subject.fetch_and_save).to eq index
-        end.to output(/\[relaton-iso\] INFO: Downloaded index from `url`/).to_stderr_from_any_process
+        end.to output(
+          /\[relaton-iso\] INFO: Downloaded index from `https:\/\/url\.io\/index\.zip`/,
+        ).to_stderr_from_any_process
       end
 
       context "when new index and pubid_class provided" do

@@ -158,14 +158,15 @@ module Relaton
       # @return [Array<Hash>] index
       #
       def fetch_and_save
-        resp = StringIO.new(URI(url).read)
+        uri = URI.parse(url)
+        body = Net::HTTP.get(uri)
         yaml = nil
-        Zip::File.open_buffer(resp) do |zip|
+        Zip::File.open_buffer(body) do |zip|
           entry = zip.entries.first
           yaml = entry.get_input_stream.read
         end
         Util.info "Downloaded index from `#{url}`", progname
-        load_index(yaml, _save = true)
+        load_index(yaml, true)
       end
 
       def warn_remote_index_error(reason)
