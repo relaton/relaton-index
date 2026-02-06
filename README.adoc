@@ -24,7 +24,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 === Creating an index object
 
-The gem provides the `Relaton::Index.find_or_create {type}, url: {url}, file: {filename}, id_keys: {keys}` method to create an index object. The first argument is the type of dataset (ISO, IEC, IHO, etc.). The second argument is the URL to the zipped remote index file. The third argument is the filename of the local index file. The fourth argument is an array of ID's parts names. The URL, filename, and keys are optional.
+The gem provides the `Relaton::Index.find_or_create {type}, url: {url}, file: {filename}, id_keys: {keys}, pubid_class: {class}` method to create an index object. The first argument is the type of dataset (ISO, IEC, IHO, etc.). The second argument is the URL to the zipped remote index file. The third argument is the filename of the local index file. The fourth argument is an array of ID's parts names. The fifth argument is a class that implements `Pubid::Core::Identifier` for deserializing ID hashes into structured identifier objects. The URL, filename, keys, and pubid_class are optional.
 
 If the URL is specified and the local file in a `/{home}/.relaton/{type}` dir doesn't exist or is outdated, the index file will be downloaded from the URL saved as a local file and an index object will be created from the file. If the file in the `/{home}/.relaton/{type}` exists and is actual, the index object will be created from the local file.
 
@@ -95,6 +95,30 @@ index.search do |row|
   row[:id] == "B-4"
 end
 # => [{ id: "B-4 2.19.0", file: "data/b-4_2_19_0.xml" }]
+----
+
+=== Using pubid_class for structured identifiers
+
+The `pubid_class` option allows index entries to be deserialized into structured identifier objects instead of plain strings or hashes. The class must include `Pubid::Core::Identifier` and provide a `.create(**hash)` factory method.
+
+When `pubid_class` is specified, each `:id` hash in the index is converted into a pubid object, enabling structured access to identifier components (e.g., publisher, number, part, year).
+
+[source,ruby]
+----
+require 'relaton/index'
+require 'pubid-iso'
+
+# Create an index with pubid_class to deserialize IDs into Pubid::Iso::Identifier objects
+index = Relaton::Index.find_or_create :ISO,
+  url: "https://raw.githubusercontent.com/relaton/relaton-data-iso/main/index-v2.zip",
+  pubid_class: Pubid::Iso::Identifier
+
+# Search returns entries with structured pubid objects as IDs
+results = index.search "ISO 1"
+results.first[:id]
+# => #<Pubid::Iso::Identifier: ISO 1>
+results.first[:id].publisher
+# => "ISO"
 ----
 
 === Remove all index records
