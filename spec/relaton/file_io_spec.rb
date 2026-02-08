@@ -17,18 +17,46 @@ describe Relaton::Index::FileIO do
     let(:pubid_class) { TestIdentifier }
 
     context "#deserialize_pubid" do
-      subject { described_class.new("iso", nil, "index.yaml", nil, pubid_class).deserialize_pubid(index) }
+      let(:file_io) { described_class.new("iso", nil, "index.yaml", nil, pubid_class) }
       let(:index) { [{ id: { publisher: "ISO", number: 1 } }] }
 
-      it "deserealizes pubid objects" do
-        expect(subject.first[:id]).to eq(TestIdentifier.create(publisher: "ISO", number: 1))
+      context "when pubid_class is specified" do
+        subject { file_io.deserialize_pubid(index) }
+
+        it "deserealizes pubid objects" do
+          expect(subject.first[:id]).to eq(TestIdentifier.create(publisher: "ISO", number: 1))
+        end
+
+        it "sets sorted to true when index is sorted by number" do
+          sorted_index = [
+            { id: { publisher: "ISO", number: 1 }, file: "f1" },
+            { id: { publisher: "ISO", number: 2 }, file: "f2" },
+          ]
+          file_io.deserialize_pubid(sorted_index)
+          expect(file_io.sorted).to be true
+        end
+
+        it "sets sorted to false when index is unsorted" do
+          unsorted_index = [
+            { id: { publisher: "ISO", number: 2 }, file: "f2" },
+            { id: { publisher: "ISO", number: 1 }, file: "f1" },
+          ]
+          file_io.deserialize_pubid(unsorted_index)
+          expect(file_io.sorted).to be false
+        end
       end
 
       context "when pubid_class is not specified" do
         let(:pubid_class) { nil }
+        subject { file_io.deserialize_pubid(index) }
 
         it "returns original index values" do
           expect(subject.first[:id]).to eq(index.first[:id])
+        end
+
+        it "sorted remains false" do
+          file_io.deserialize_pubid(index)
+          expect(file_io.sorted).to be false
         end
       end
     end
@@ -245,9 +273,27 @@ describe Relaton::Index::FileIO do
     end
 
     context "#save" do
-      it do
-        expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", "---\n- :id:\n    :publisher: ISO\n    :number: '1'\n  :file: data/1.yaml\n")
-        subject.save [{ id: TestIdentifier.create(publisher: "ISO", number: 1), file: "data/1.yaml" }]
+      it "sorts by pubid number when pubid_class is set" do
+        expected_yaml = "---\n- :id:\n    :publisher: ISO\n    :number: '1'\n  :file: data/1.yaml\n" \
+                        "- :id:\n    :publisher: ISO\n    :number: '2'\n  :file: data/2.yaml\n"
+        expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", expected_yaml)
+        subject.save [
+          { id: TestIdentifier.create(publisher: "ISO", number: 2), file: "data/2.yaml" },
+          { id: TestIdentifier.create(publisher: "ISO", number: 1), file: "data/1.yaml" },
+        ]
+      end
+
+      context "when pubid_class is nil" do
+        let(:pubid_class) { nil }
+
+        it "preserves original order" do
+          expected_yaml = [{ id: "ISO 2", file: "data/2.yaml" }, { id: "ISO 1", file: "data/1.yaml" }].to_yaml
+          expect(Relaton::Index::FileStorage).to receive(:write).with("index.yaml", expected_yaml)
+          subject.save [
+            { id: "ISO 2", file: "data/2.yaml" },
+            { id: "ISO 1", file: "data/1.yaml" },
+          ]
+        end
       end
     end
 

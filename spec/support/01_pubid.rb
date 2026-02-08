@@ -14,6 +14,10 @@ class DummyDefaultType < Pubid::Core::Identifier::Base
   def self.type
     { key: :default, title: "Default Type" }
   end
+
+  def root
+    self
+  end
 end
 
 

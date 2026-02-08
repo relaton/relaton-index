@@ -94,6 +94,73 @@ describe Relaton::Index::Type do
       end
     end
 
+    context "#search with binary search" do
+      subject do
+        described_class.new(
+          :ISO, :url, "index.yaml", nil, TestIdentifier
+        )
+      end
+
+      let(:id1) { TestIdentifier.create(number: 1, publisher: "ISO") }
+      let(:id2) { TestIdentifier.create(number: 2, publisher: "ISO") }
+      let(:id3) { TestIdentifier.create(number: 3, publisher: "ISO") }
+
+      context "when index is sorted" do
+        before do
+          sorted_data = [
+            { id: id1, file: "file1" },
+            { id: id2, file: "file2" },
+            { id: id3, file: "file3" },
+          ]
+          subject.instance_variable_set(:@index, sorted_data)
+          subject.instance_variable_get(:@file_io).sorted = true
+        end
+
+        it "finds exact pubid match via binary search" do
+          expect(subject.search(id2)).to eq [
+            { id: id2, file: "file2" },
+          ]
+        end
+
+        it "returns empty when pubid not found" do
+          id4 = TestIdentifier.create(number: 4, publisher: "ISO")
+          expect(subject.search(id4)).to eq []
+        end
+
+        it "narrows candidates for block search" do
+          yielded = []
+          subject.search(id2) do |i|
+            yielded << i
+            true
+          end
+          expect(yielded).to eq [{ id: id2, file: "file2" }]
+        end
+
+        it "falls back to full scan for string search" do
+          result = subject.search("ISO 2")
+          expect(result).to eq [{ id: id2, file: "file2" }]
+        end
+      end
+
+      context "when index is unsorted" do
+        before do
+          unsorted_data = [
+            { id: id3, file: "file3" },
+            { id: id1, file: "file1" },
+            { id: id2, file: "file2" },
+          ]
+          subject.instance_variable_set(:@index, unsorted_data)
+          subject.instance_variable_get(:@file_io).sorted = false
+        end
+
+        it "falls back to full scan for pubid search" do
+          expect(subject.search(id1)).to eq [
+            { id: id1, file: "file1" },
+          ]
+        end
+      end
+    end
+
     context "#save" do
       it "save index" do
         expect(File).to receive(:write).with(/index\.yaml$/, subject.index.to_yaml, encoding: "UTF-8")

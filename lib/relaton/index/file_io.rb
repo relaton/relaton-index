@@ -7,6 +7,7 @@ module Relaton
     #
     class FileIO
       attr_reader :url, :pubid_class
+      attr_accessor :sorted
 
       @@file_locks = {}
       @@file_locks_mutex = Mutex.new
@@ -28,6 +29,7 @@ module Relaton
         @filename = filename
         @id_keys = id_keys || []
         @pubid_class = pubid_class
+        @sorted = false
       end
 
       #
@@ -117,7 +119,15 @@ module Relaton
       def deserialize_pubid(index)
         return index unless @pubid_class
 
-        index.map { |r| { id: @pubid_class.create(**r[:id]), file: r[:file] } }
+        @sorted = true
+        prev_number = nil
+        index.map do |r|
+          id = @pubid_class.create(**r[:id])
+          num = get_id_number id
+          @sorted = false if prev_number && prev_number > num
+          prev_number = num
+          { id: id, file: r[:file] }
+        end
       end
 
       def warn_local_index_error(reason)
@@ -183,10 +193,22 @@ module Relaton
       # @return [void]
       #
       def save(index)
-        yaml = index.map do |item|
+        yaml = sort_structured_index(index).map do |item|
           item.transform_values { |value| value.is_a?(Pubid::Core::Identifier::Base) ? value.to_h : value }
         end.to_yaml
         Index.config.storage.write file, yaml
+      end
+
+      def sort_structured_index(index)
+        if @pubid_class && index.first&.dig(:id).is_a?(Pubid::Core::Identifier::Base)
+          index.sort_by { |item| get_id_number item[:id] }
+        else
+          index
+        end
+      end
+
+      def get_id_number(id)
+        id.respond_to?(:base) && id.base ? id.base.number.to_s : id.number.to_s
       end
 
       #
