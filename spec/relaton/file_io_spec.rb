@@ -23,7 +23,7 @@ describe Relaton::Index::FileIO do
       context "when pubid_class is specified" do
         subject { file_io.deserialize_pubid(index) }
 
-        it "deserealizes pubid objects" do
+        it "deserializes pubid objects" do
           expect(subject.first[:id]).to eq(TestIdentifier.create(publisher: "ISO", number: 1))
         end
 

@@ -14,8 +14,7 @@ module Relaton
       #   format of index file is checked if id_keys all is provided at least in one of the IDs
       # @param [Pubid::Core::Identifier::Base, nil] pubid class for deserialization
       #
-      def initialize(type, *args)
-        url, file, id_keys, pubid_class = args
+      def initialize(type, url = nil, file = nil, id_keys = nil, pubid_class = nil) # rubocop:disable Metrics/ParameterLists
         @file = file
         filename = file || Index.config.filename
         @file_io = FileIO.new type.to_s.downcase, url, filename, id_keys, pubid_class
