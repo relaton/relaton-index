@@ -10,9 +10,11 @@ module Relaton
       # @param [String, Symbol] type type of index (ISO, IEC, etc.)
       # @param [String, nil] url external URL to index, used to fetch index for searching files
       # @param [String, nil] file output file name
-      # @param [Pubid::Core::Identifier::Base] pubid class for deserialization
+      # @param [Array<Symbol>] id_keys keys of identifier to be used for sorting index
+      #   format of index file is checked if id_keys all is provided at least in one of the IDs
+      # @param [Pubid::Core::Identifier::Base, nil] pubid class for deserialization
       #
-      def initialize(type, url = nil, file = nil, id_keys = nil, pubid_class = nil)
+      def initialize(type, url = nil, file = nil, id_keys = nil, pubid_class = nil) # rubocop:disable Metrics/ParameterLists
         @file = file
         filename = file || Index.config.filename
         @file_io = FileIO.new type.to_s.downcase, url, filename, id_keys, pubid_class
@@ -45,11 +47,15 @@ module Relaton
       # @return [void]
       #
       def add_or_update(id, file)
-        item = index.find { |i| i[:id] == id }
+        key = id.to_s
+        item = id_lookup[key]
         if item
           item[:file] = file
         else
-          index << { id: id, file: file }
+          new_item = { id: id, file: file }
+          index << new_item
+          id_lookup[key] = new_item
+          @file_io.sorted = false
         end
       end
 
@@ -60,18 +66,11 @@ module Relaton
       #
       # @return [Array<Hash>] search results
       #
-      def search(id = nil)
-        index.select do |i|
-          if block_given?
-            yield(i)
-          else
-            if i[:id].is_a?(String)
-              id.is_a?(String) ? i[:id].include?(id) : i[:id].include?(id.to_s)
-            else
-              id.is_a?(String) ? i[:id].to_s.include?(id) : i[:id] == id
-            end
-          end
-        end
+      def search(id = nil, &block)
+        items = search_candidates(id)
+        return items.select(&block) if block
+
+        items.select { |i| match_item(i, id) }
       end
 
       #
@@ -91,6 +90,7 @@ module Relaton
       def remove_file
         @file_io.remove
         @index = nil
+        @id_lookup = nil
       end
 
       #
@@ -100,6 +100,61 @@ module Relaton
       #
       def remove_all
         @index = []
+        @id_lookup = nil
+        @file_io.sorted = true
+      end
+
+      private
+
+      def id_lookup
+        @id_lookup ||= index.each_with_object({}) do |item, h|
+          h[item[:id].to_s] = item
+        end
+      end
+
+      def search_candidates(id)
+        # index needs to be created to check if sorted
+        idx = index
+        if @file_io.sorted && id && !id.is_a?(String)
+          candidates_by_number(id)
+        else
+          idx
+        end
+      end
+
+      def candidates_by_number(id)
+        target = get_id_number(id)
+        left = bsearch_left(target)
+        return [] unless left
+
+        right = bsearch_right(target)
+        index[left...right]
+      end
+
+      def get_id_number(id)
+        id.respond_to?(:base) && id.base ? id.base.number.to_s : id.number.to_s
+      end
+
+      def bsearch_left(target)
+        index.bsearch_index do |item|
+          get_id_number(item[:id]) >= target
+        end
+      end
+
+      def bsearch_right(target)
+        index.bsearch_index do |item|
+          get_id_number(item[:id]) > target
+        end || index.size
+      end
+
+      def match_item(item, id)
+        if item[:id].is_a?(String)
+          item[:id].include?(id.is_a?(String) ? id : id.to_s)
+        elsif id.is_a?(String)
+          item[:id].to_s.include?(id)
+        else
+          item[:id] == id
+        end
       end
     end
   end
