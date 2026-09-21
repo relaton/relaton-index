@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "pubid-core", "~> 1.15.6"
   spec.add_dependency "relaton-logger", "~> 0.2.0"
-  spec.add_dependency "rubyzip", "~> 2.3.0"
+  spec.add_dependency "rubyzip", "~> 3.7"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
