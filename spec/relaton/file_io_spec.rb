@@ -16,6 +16,17 @@ describe Relaton::Index::FileIO do
     end
     let(:pubid_class) { TestIdentifier }
 
+    context "#sort_structured_index" do
+      it "sorts a mixed pubid/string index, string rows first (no crash)" do
+        pub2 = TestIdentifier.create(publisher: "ISO", number: 2)
+        pub10 = TestIdentifier.create(publisher: "ISO", number: 10)
+        index = [{ id: pub2, file: "a" }, { id: "legacy id", file: "b" },
+                 { id: pub10, file: "c" }]
+        sorted = subject.sort_structured_index(index)
+        expect(sorted.map { |i| i[:id] }).to eq(["legacy id", pub10, pub2])
+      end
+    end
+
     context "#deserialize_pubid" do
       let(:file_io) { described_class.new("iso", nil, "index.yaml", nil, pubid_class) }
       let(:index) { [{ id: { publisher: "ISO", number: 1 } }] }
