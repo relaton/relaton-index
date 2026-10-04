@@ -207,7 +207,11 @@ module Relaton
         end
       end
 
+      # A legacy string id has no number; it sorts ahead of every numbered
+      # row, keeping the sort total over a mixed pubid/string index.
       def get_id_number(id)
+        return "" unless id.respond_to?(:number)
+
         id.respond_to?(:base) && id.base ? id.base.number.to_s : id.number.to_s
       end
 
